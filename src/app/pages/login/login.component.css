@@ -1,0 +1,40 @@
+
+.loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  flex-direction: column;
+  background: url('/level.jpg') no-repeat center center/cover;
+  background-color: #001529;
+}
+
+.logo {
+  border-radius: 50%;
+  width: 50%;
+  margin-bottom: 20px;
+}
+
+.login-form {
+  max-width: 350px;
+  margin: 20px;
+  background: #fff4;
+  padding: 20px;
+  border: 1px solid #0004;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  z-index: 10;
+}
+
+.login-form-margin {
+  margin-bottom: 16px;
+}
+
+.login-form-forgot {
+  float: right;
+}
+
+.login-form-button {
+  width: 100%;
+}

@@ -1,0 +1,45 @@
+.data-table {
+  width: 100%;
+  border-collapse: collapse; 
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+.data-table th {
+  background-color: #f4f4f4;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid #ddd;
+  font-weight: bold;
+}
+
+.data-table td {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+
+.data-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+
+
+.nz-collapse-panel {
+  margin-bottom: 10px;
+}
+
+.controls-container button {
+  margin-top: 10px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+nz-date-picker {
+  margin-right: 12px;
+}

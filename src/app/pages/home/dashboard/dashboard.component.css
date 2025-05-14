@@ -1,0 +1,71 @@
+.tank-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+}
+
+.tank-container {
+  flex: 1 1 320px;
+  max-width: 400px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #d9d9d9;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.square-tank-chart {
+  width: 100%;
+  max-width: 280px;
+  height: 280px;
+  border-left: 4px solid #4A90E2;
+  border-right: 4px solid #4A90E2;
+  border-bottom: 8px solid #003f7f;
+  border-top: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  overflow: hidden;
+  margin: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.motor-status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.tank-label {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.tank-button {
+  background-color: #5092e0;
+  padding: 4px 0;
+  width: 100px;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .square-tank-chart {
+    height: 250px;
+    max-width: 240px;
+  }
+
+  .tank-container {
+    max-width: 80%;
+  }
+
+  .tank-button {
+    width: 80px;
+    font-size: 13px;
+  }
+}

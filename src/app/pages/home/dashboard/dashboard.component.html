@@ -1,0 +1,14 @@
+<div class="tank-grid">
+  <div *ngFor="let device of devices" class="tank-container">
+<img
+      [src]="isPumpOn(device) ? 'on_tap.avif' : 'off.png'"
+      alt="Motor status"
+      width="100"
+      
+    />
+    <div echarts [options]="device.chartOptions" class="square-tank-chart"></div>
+    <div class="tank-label">
+      <button nz-button class="tank-button">tank</button>
+    </div>
+  </div>
+</div>

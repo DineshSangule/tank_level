@@ -1,0 +1,92 @@
+<h2>Users
+    <button nz-button nzType="primary" class="add-product-button" (click)="open()" style="float:right;margin-bottom: 5px;">
+        <nz-icon nzType="plus" /> Add user
+    </button>
+    <nz-input-group class="search-input" nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
+        <input type="text" nz-input placeholder="input search text" />
+    </nz-input-group>
+    <ng-template #suffixButton>
+        <button nz-button nzType="primary" nzSize="large" nzSearch>Search</button>
+    </ng-template>
+</h2>
+
+<nz-table #smallTable nzSize="small" [nzData]="users" [nzShowSizeChanger]="true" [nzFrontPagination]="false">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Mobile No</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>aaa</td>
+            <td>bb</td>
+            <td>cc</td>
+            <td> 08080989</td>
+            <td>
+                <div class="action-buttons" style="display: flex; gap: 8px;">
+                    <a nz-button nzType="primary"><nz-icon nzType="Edit" /> Edit</a>
+                    <a nz-button nzType="default"><nz-icon nzType="delete" /> Delete</a>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</nz-table>
+
+<!-- Add User Drawer -->
+<nz-drawer [nzBodyStyle]="{ overflow: 'auto' }" [nzMaskClosable]="false" [nzWidth]="720" [nzVisible]="isVisible "
+    nzTitle="Create User" [nzFooter]="footerTpl" (nzOnClose)="close()">
+    <form  (ngSubmit)="submitForm()"  nz-form *nzDrawerContent>
+
+        <nz-form-item>
+            <nz-form-label>Name</nz-form-label>
+            <nz-form-control>
+                <input nz-input formControlName="name" placeholder="Please enter name" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+            <nz-form-label>Username</nz-form-label>
+            <nz-form-control>
+                <input nz-input formControlName="username" placeholder="Please enter username" />
+            </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+            <nz-form-label>Password</nz-form-label>
+            <nz-form-control>
+                <input nz-input formControlName="password" placeholder="Please enter password" type="password" />
+            </nz-form-control>
+        </nz-form-item>
+
+        
+
+        <nz-form-item>
+            <nz-form-label>Mobile</nz-form-label><br>
+            <nz-form-control>
+                <input nz-input formControlName="mobile" placeholder="Please enter mobile number" />
+            </nz-form-control>
+        </nz-form-item>
+
+     <!--
+        <nz-form-item>
+            <nz-form-label>Is Active</nz-form-label>
+            <nz-form-control>
+                <nz-select formControlName="isActive">
+                    <nz-option nzValue="1" nzLabel="Active">1</nz-option>
+                    <nz-option nzValue="0" nzLabel="Inactive"></nz-option>
+                </nz-select>
+            </nz-form-control>
+        </nz-form-item>
+    
+-->
+        </form>
+    <ng-template #footerTpl>
+        <div style="float: right">
+            <button nz-button style="margin-right: 8px;" (click)="close()">Cancel</button>
+            <button nz-button nzType="primary" (click)="submitForm()">Submit</button>
+        </div>
+    </ng-template>
+</nz-drawer>

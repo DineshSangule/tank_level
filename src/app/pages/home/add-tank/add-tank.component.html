@@ -1,0 +1,72 @@
+<h1 style="margin-bottom: 10px; ">
+  <nz-icon nzType="plus" style="margin-right: 8px;"></nz-icon>
+  Add Tank
+</h1>
+
+<div style="display: flex; justify-content: center;">
+  <div style="width: 100%; max-width: 600px;">
+    <nz-card>
+      <form nz-form [nzLayout]="'vertical'">
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true">Tank ID</nz-form-label>
+          <nz-form-control>
+            <input nz-input name="deviceId" placeholder="Enter Tank ID" type="number" required />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true">User ID</nz-form-label>
+          <nz-form-control>
+            <input nz-input name="userId" placeholder="Enter User ID" type="text" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true">Tank Name</nz-form-label>
+          <nz-form-control>
+            <input nz-input name="TankName" placeholder="Enter Tank Name" type="text" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>IMEI Number</nz-form-label>
+          <nz-form-control>
+            <input nz-input name="imei" placeholder="Enter IMEI Number" type="text" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Area</nz-form-label>
+          <nz-form-control>
+            <input nz-input name="area" placeholder="Enter Area" type="text" />
+          </nz-form-control>
+        </nz-form-item>
+
+         <nz-form-item>
+            <nz-form-label>Start Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker
+              name="startDate"
+              [nzFormat]="'dd-MM-yyyy'"
+              >
+            </nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+  
+          <nz-form-item>
+            <nz-form-label>Expiry Date</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker
+              name="expiryDate"
+              [nzFormat]="'dd-MM-yyyy'">
+            </nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <button nz-button nzType="primary" style="padding: 0 30px;">Add</button>
+        </div>
+      </form>
+    </nz-card>
+  </div>
+</div>
