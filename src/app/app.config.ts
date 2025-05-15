@@ -17,7 +17,8 @@ import { NzIconModule, NZ_ICONS } from 'ng-zorro-antd/icon';
 import {
   DashboardOutline,
   PlusOutline,
-  MenuFoldOutline
+  MenuFoldOutline,
+  
 } from '@ant-design/icons-angular/icons';
 
 registerLocaleData(en);

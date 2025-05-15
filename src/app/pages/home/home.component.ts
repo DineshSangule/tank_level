@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component ,HostListener,ElementRef} from '@angular/core';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -16,9 +16,13 @@ import { RouterModule } from '@angular/router';
 export class HomeComponent {
       isCollapsed = false;
 
-       onBreakpoint(collapsed: boolean): void {
+      constructor(private eRef: ElementRef){}
+
+    onBreakpoint(collapsed: boolean): void {
     this.isCollapsed = collapsed;
   }
+
+
 
 
 }

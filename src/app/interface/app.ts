@@ -8,4 +8,8 @@ export interface Device{
     startDate:Date;
     expiryDate:Date;
 }
+export interface User{
+    id?: number;
+    name: string;
+}
 

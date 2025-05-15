@@ -1,0 +1,15 @@
+@media (max-width: 768px) {
+  .add-product-button {
+    width: 50%;
+    margin-top: 10px;
+  }
+
+  .search-wrapper {
+    margin-top: 10px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
