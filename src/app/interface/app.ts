@@ -9,7 +9,11 @@ export interface Device{
     expiryDate:Date;
 }
 export interface User{
-    id?: number;
-    name: string;
+   id?: number;        // optional for new users before they get an ID
+  userId: string;     // username
+  name: string;
+  password: string;
+  mobile?: string; 
+  role: string;
 }
 

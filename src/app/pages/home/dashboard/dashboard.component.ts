@@ -2,18 +2,22 @@ import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { FormsModule } from '@angular/forms';
 import 'echarts-liquidfill';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NgxEchartsModule, CommonModule, NzCardModule],
+  imports: [NgxEchartsModule, CommonModule, NzCardModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   isBrowser: boolean;
   devices: any[] = [];
+
+  tankName = 'Tank 1'; 
+  isEditing = false;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -22,26 +26,32 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
+    setInterval(() => {
+      this.checkTankLevels();
+    }, 5000);
+
     const deviceData = [
       {
-        name: 'Pump ',
+        name: 'Pump 1',
         redWireVoltage: 10,
-        yellowWireVoltage: 10,
+        yellowWireVoltage: 0,
         blueWireVoltage: 0,
         redWireCurrent: 10,
         yellowWireCurrent: 0,
-        blueWireCurrent :0,
-      },
-  
+        blueWireCurrent: 10,
+        tankName: 'Tank',
+        voiceAnnounced: false
+      }
     ];
 
     this.devices = deviceData.map(device => {
       const waterLevel = this.calculateWaterLevel(device);
       const options = this.generateChartOptions(device, waterLevel);
-      return { ...device, chartOptions: options, waterLevel };
+      return { ...device, chartOptions: options, level: waterLevel };
     });
   }
-    isPumpOn(device: any): boolean {
+
+  isPumpOn(device: any): boolean {
     return device.blueWireCurrent > 0;
   }
 
@@ -51,7 +61,7 @@ export class DashboardComponent implements OnInit {
       yellowWireVoltage,
       blueWireVoltage,
       redWireCurrent,
-      yellowWireCurrent,
+      yellowWireCurrent
     } = device;
 
     if (yellowWireCurrent > 0) return 100;
@@ -78,12 +88,8 @@ export class DashboardComponent implements OnInit {
           center: ['50%', '60%'],
           amplitude: 0,
           waveAnimation: false,
-          outline: {
-            show: false
-          },
-          backgroundStyle: {
-            color: '#ffff'
-          },
+          outline: { show: false },
+          backgroundStyle: { color: '#ffff' },
           itemStyle: {
             color: {
               image: this.createDottedPattern(),
@@ -95,15 +101,15 @@ export class DashboardComponent implements OnInit {
             formatter: `{percentage|${waterLevel}%}`,
             rich: {
               percentage: {
-                fontSize: 18,
+                fontSize: 30,
                 color: 'black',
                 fontWeight: 'bold',
-                lineHeight: 20
+                lineHeight: 60
               }
             },
             align: 'center',
             verticalAlign: 'middle',
-            position: ['50%', '60%']
+            position: ['50%', '50%']
           }
         }
       ],
@@ -159,9 +165,11 @@ export class DashboardComponent implements OnInit {
           },
           z: 100
         }
+        
       ];
     }).flat();
   }
+  
 
   createDottedPattern(): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
@@ -179,4 +187,54 @@ export class DashboardComponent implements OnInit {
     ctx.stroke();
     return canvas;
   }
+
+  editTankName() {
+    this.isEditing = true;
+  }
+
+  saveTankName() {
+    this.isEditing = false;
+    console.log('Updated tank name:', this.tankName);
+  }
+
+ speak(message: string): void {
+  const utterance = new SpeechSynthesisUtterance(message);
+  utterance.lang = 'en-US'; 
+  utterance.rate = 0.8;    
+  utterance.pitch = 1;      
+  utterance.volume = 1;     
+
+  const voices = speechSynthesis.getVoices();
+  const preferredVoice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google'));
+
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+  }
+
+  speechSynthesis.cancel(); 
+  speechSynthesis.speak(utterance);
+}
+
+  checkTankLevels(): void {
+  const levelsToAnnounce = [20, 40, 60, 80, 100];
+
+  this.devices.forEach(device => {
+    const level = device.level;
+    if (!device.voiceAnnouncedLevels) {
+      device.voiceAnnouncedLevels = {};
+    }
+
+    levelsToAnnounce.forEach(threshold => {
+      if (level === threshold && !device.voiceAnnouncedLevels[threshold]) {
+        this.speak(`${device.tankName || 'Tank'} ${threshold} percent full`);
+        device.voiceAnnouncedLevels[threshold] = true;
+      }
+
+      if (level < threshold - 5 || level > threshold + 5) {
+        device.voiceAnnouncedLevels[threshold] = false;
+      }
+    });
+  });
+}
+
 }

@@ -14,6 +14,7 @@ import { UserService } from '../../../services/user.service';
 import { FormBuilder,FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { CommonModule } from '@angular/common';
+import { User } from '../../../interface/app';
 
 @Component({
   selector: 'app-users',
@@ -33,14 +34,14 @@ import { CommonModule } from '@angular/common';
   styleUrl: './users.component.css'
 })
 export class UsersComponent implements OnInit {
-
-  users: any[] = [];
+ 
+  users: User[] = [];
   filteredUsers: any[] = [];
   isVisible = false;
   isEdit = false;
   form!: FormGroup;
   loading = false;
-  currentUserId: number | null = null;
+  currentUserId: number | null = null; 
   searchText: string = '';
   constructor(private fb: FormBuilder,private userService: UserService,  private message: NzMessageService ) {}
 
@@ -52,15 +53,18 @@ export class UsersComponent implements OnInit {
   
   initForm(): void {
     this.form = this.fb.group({
+       userId: ['', [Validators.required]],
       name: ['', [Validators.required]],
-      username: ['', [Validators.required]],
       password: ['', [Validators.required]],
-      mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
+      mobile: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      role: ['User', Validators.required]  
+
+
     });
   }
 
   loadUsers():void{
-    this.userService.getUsers().subscribe(
+    this.userService.getAllUsers().subscribe(
       {
         next:(data) =>
         {
@@ -162,7 +166,7 @@ export class UsersComponent implements OnInit {
   }
 
  
-
+/*
   onSearch(): void
   {
     const search = this.searchText.trim().toLowerCase();
@@ -179,7 +183,7 @@ export class UsersComponent implements OnInit {
     }
 
   }
-
+*/
 
   open(): void {
     this.form.reset();

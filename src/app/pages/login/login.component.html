@@ -1,23 +1,26 @@
 <div class="loginPage">
-    <form nz-form  class="login-form" >
-        <img src="/logo.jpg" alt="logo" class="logo">
-        <nz-form-item>
-            <nz-form-control nzErrorTip="Please input your username!">
-                <nz-input-group nzPrefixIcon="user">
-                    <input type="text" nz-input formControlName="username" placeholder="Username" />
-                </nz-input-group>
-            </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-            <nz-form-control nzErrorTip="Please input your Password!">
-                <nz-input-group nzPrefixIcon="lock">
-                    <input type="password" nz-input formControlName="password" placeholder="Password" />
-                </nz-input-group>
-            </nz-form-control>
-        </nz-form-item>
-        <button nz-button class="login-form-button login-form-margin" >Log in</button>
-        <a href="https://wa.me/919284843301?text=I%20forgot%20my%20password" target="_blank">Forget Password?</a> 
-        Or 
-        <a href="https://wa.me/919284843301?text=I%20want%20to%20create%20a%20new%20account" target="_blank">Create New Account</a>
-    </form>
+  <form [formGroup]="loginForm" (ngSubmit)="onsubmit()" class="login-form">
+    <img src="/logo.jpg" alt="logo" class="logo" />
+
+    <nz-form-item>
+      <nz-form-control [nzValidateStatus]="loginForm.controls['username']" nzErrorTip="Please input your username!">
+        <nz-input-group nzPrefixIcon="user">
+          <input type="text" nz-input formControlName="username" placeholder="Username" />
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-control [nzValidateStatus]="loginForm.controls['password']" nzErrorTip="Please input your Password!">
+        <nz-input-group nzPrefixIcon="lock">
+          <input type="password" nz-input formControlName="password" placeholder="Password" />
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+
+    <button nz-button class="login-form-button login-form-margin" type="submit">Log in</button>
+    <a href="https://wa.me/919284843301?text=I%20forgot%20my%20password" target="_blank">Forget Password?</a>
+    Or
+    <a href="https://wa.me/919284843301?text=I%20want%20to%20create%20a%20new%20account" target="_blank">Create New Account</a>
+  </form>
 </div>

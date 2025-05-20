@@ -38,7 +38,7 @@
   <tbody>
     <tr *ngFor="let user of filteredUsers">
       <td>{{ user.name }}</td>
-      <td>{{ user.username }}</td>
+      <td>{{ user.userid }}</td>
       <td>{{ user.password }}</td>
       <td>{{ user.mobile }}</td>
       <td>
@@ -76,7 +76,7 @@
         <nz-form-item>
           <nz-form-label>Username</nz-form-label>
           <nz-form-control>
-            <input nz-input formControlName="username" placeholder="Please enter username" />
+            <input nz-input formControlName="userId" placeholder="Please enter username" />
           </nz-form-control>
         </nz-form-item>
 
@@ -93,12 +93,22 @@
             <input nz-input formControlName="mobile" placeholder="Please enter mobile number" />
           </nz-form-control>
         </nz-form-item>
+
+         <nz-form-item>
+    <nz-form-label [nzSpan]="6" >Role</nz-form-label>
+    <nz-form-control [nzSpan]="14">
+      <nz-select formControlName="role" nzPlaceHolder="Select a role">
+        <nz-option nzValue="Admin" nzLabel="Admin"></nz-option>
+        <nz-option nzValue="User" nzLabel="User"></nz-option>
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
   </form>
 
   <ng-template #footerTpl>
     <div style="float: right">
       <button nz-button style="margin-right: 8px;" (click)="close()">Cancel</button>
-      <button nz-button nzType="primary" [nzLoading]="false" (click)="submitForm()">Submit</button>
+      <button nz-button nzType="primary" [nzLoading]="false"  (click)="submitForm()">Submit</button>
     </div>
   </ng-template>
 </nz-drawer>

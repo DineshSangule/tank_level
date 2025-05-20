@@ -7,21 +7,19 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-  private baseUrl = 'http://'
+  private Url = 'http://tank.agromationindia.com/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  login(credentials:{userId: string; password: string}):Observable<any>
-  {
-    return this.http.post('${baseUrl}/login',credentials);
+  login(credentials: { username: string; password: string }): Observable<any> {
+    return this.http.post(`${this.Url}/login`, credentials);
   }
 
-  isLoggedIn(): boolean{
+  isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
 
-  logout()
-  {
+  logout(): void {
     localStorage.removeItem('token');
   }
 }
