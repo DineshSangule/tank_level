@@ -89,7 +89,7 @@ cron.schedule("*/15 * * * *", () => {
   con.query(query, (err, result, fields) => {
     if (!err) {
       result.forEach(element => {
-        const imei = element.uuid;
+        const imei = element.uuid; 
         redis_client.get("vl:" + imei).then(data1 => {
           console.log(data1);
           if (!data1) return;

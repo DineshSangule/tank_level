@@ -61,7 +61,10 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+             
+              ]
             }
           },
           "defaultConfiguration": "production"

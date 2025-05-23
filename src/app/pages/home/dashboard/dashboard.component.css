@@ -69,3 +69,28 @@
     font-size: 13px;
   }
 }
+.motor-status-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.motor-icon {
+  float: right;
+}
+
+.motor-status-label {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 12px;
+  color: white;
+}
+
+.motor-status-label.on {
+  background-color: #4caf50; 
+}
+
+.motor-status-label.off {
+  background-color: #f44336;
+}
+

@@ -13,19 +13,19 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}`);  // GET /api/users to fetch all users (implement backend accordingly)
+    return this.http.get<User[]>(`${this.baseUrl}`);  
   }
 
 
   addUser(user: User): Observable<any> {
-    return this.http.post(`${this.baseUrl}/add`, user); // POST /api/users/add (matches backend add user API)
+    return this.http.post(`${this.baseUrl}/add`, user); 
   }
 
   updateUser(id: number, user: User): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}`, user); // PUT /api/users/:id (implement backend accordingly)
+    return this.http.put(`${this.baseUrl}/${id}`, user);
   }
 
   deleteUser(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);  // DELETE /api/users/:id (implement backend accordingly)
+    return this.http.delete(`${this.baseUrl}/${id}`);  
   }
 }

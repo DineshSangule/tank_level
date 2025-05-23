@@ -1,28 +1,137 @@
-<div class="report-section">
-  
-      <div class="controls-container">
-        <nz-date-picker 
-          [(ngModel)]="selectedDate" 
-          [nzFormat]="'dd-MM-yyyy'"
-          (ngModelChange)="onDateChange()" 
-          >
-        </nz-date-picker>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Percentage</th>
-             
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of reportData">
-              <td>{{row.time}}</td>
-              <td>{{row.Percentage}}</td>
-           
-            </tr>
-          </tbody>
-        </table>
-      </div>
+<nz-card nzTitle="Daily Report " class="filter-card"> 
+  <div class="filter-row" nz-row nzGutter="16" style="align-items: center;">
+    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="dailyDeviceId">Device ID</nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <input nz-input [(ngModel)]="dailyDeviceId" type="number" id="dailyDeviceId" placeholder="Enter Device ID" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="dailyFromDate">From Date</nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <input nz-input [(ngModel)]="dailyFromDate" type="date" id="dailyFromDate" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="dailyToDate">To Date</nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <input nz-input [(ngModel)]="dailyToDate" type="date" id="dailyToDate" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+ <div nz-row nzGutter="8" class="button-wrapper">
+  <div nz-col nzXs="24" nzSm="12">
+    <button nz-button nzType="primary" (click)="fetchDailyReports()" class="fetch-btn" style="width: 100%;">
+      Get Data
+    </button>
+  </div>
+  <div nz-col nzXs="24" nzSm="12">
+    <button nz-button nzType="default" (click)="exportToExcel('daily')" class="fetch-btn"  style="width: 100%;">
+      Export Data
+    </button>
+  </div>
 </div>
+
+
+</nz-card>
+
+
+
+<div nzTitle="Daily Reports" *ngIf="dailyReports.length > 0" class="reports-card">
+  <div class="table-responsive-wrapper">
+    <nz-table
+      [nzData]="dailyReports"
+      [nzFrontPagination]="false"
+      [nzPageSize]="10"
+      [nzSize]="'middle'"
+      [nzBordered]="true"
+    >
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Tank Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of dailyReports">
+          <td>{{ row.date | date: 'HH.mm' }}</td>
+          <td>{{ row.level }}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<!---
+
+<nz-card nzTitle="Monthly Report Filters" style="margin-bottom: 24px;">
+  <div class="filter-row" nz-row nzGutter="16" style="align-items: center;">
+    <div nz-col nzSpan="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="8" nzFor="monthlyDeviceId">Device ID</nz-form-label>
+        <nz-form-control [nzSpan]="16">
+          <input nz-input [(ngModel)]="monthlyDeviceId" type="number" id="monthlyDeviceId" placeholder="Enter Device ID" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col nzSpan="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="8" nzFor="monthlyFromDate">From Date</nz-form-label>
+        <nz-form-control [nzSpan]="16">
+          <input nz-input [(ngModel)]="monthlyFromDate" type="date" id="monthlyFromDate" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col nzSpan="6">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="8" nzFor="monthlyToDate">To Date</nz-form-label>
+        <nz-form-control [nzSpan]="16">
+          <input nz-input [(ngModel)]="monthlyToDate" type="date" id="monthlyToDate" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col nzSpan="4" style="text-align: left;">
+      <button nz-button nzType="primary" (click)="fetchMonthlyReports()" style="margin-top: 4px;">
+        Fetch Monthly
+      </button>
+    </div>
+  </div>
+</nz-card>
+
+<nz-card nzTitle="Monthly Reports" *ngIf="monthlyReports.length > 0">
+  <nz-table
+    [nzData]="monthlyReports"
+    [nzFrontPagination]="false"
+    [nzPageSize]="10"
+    [nzScroll]="{ x: '600px' }"
+    [nzSize]="'middle'"
+    [nzBordered]="true"
+  >
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Level</th>
+        <th>Run Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of monthlyReports">
+        <td>{{ row.time | date: 'yyyy-MM HH:mm:ss' }}</td>
+        <td>{{ row.level }}</td>
+        <td>{{ row.runTime || '-' }}</td>
+      </tr>
+    </tbody>
+  </nz-table>
+</nz-card>
+-->

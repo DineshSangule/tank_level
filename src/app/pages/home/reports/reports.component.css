@@ -1,45 +1,45 @@
-.data-table {
+.filter-card,
+.reports-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+}
+
+.fetch-btn {
   width: 100%;
-  border-collapse: collapse; 
-  margin-top: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  font-weight: 500;
 }
 
-.data-table th {
-  background-color: #f4f4f4;
-  text-align: left;
-  padding: 10px;
-  border: 1px solid #ddd;
-  font-weight: bold;
-}
-
-.data-table td {
-  padding: 8px 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-}
-
-
-.data-table tr:hover {
-  background-color: #f9f9f9;
-}
-
-
-
-.nz-collapse-panel {
-  margin-bottom: 10px;
-}
-
-.controls-container button {
-  margin-top: 10px;
-}
-
-.button-group {
+.button-wrapper {
+  margin-top: 12px;
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-nz-date-picker {
-  margin-right: 12px;
+::ng-deep .ant-table-thead > tr > th,
+::ng-deep .ant-table-tbody > tr > td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 12px;
+}
+
+::ng-deep .ant-table {
+  min-width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  ::ng-deep .ant-table {
+    font-size: 13px;
+  }
+
+  .fetch-btn {
+    margin-top: 8px;
+  }
 }

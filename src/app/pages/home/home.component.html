@@ -5,9 +5,9 @@
   <img src="logo.jpg" alt="Agromation Logo" style="width: 50px; height: auto; margin-right: 10px;border-radius: 80%;">
   <h2 style="color: white; margin: 0;">Agromation</h2>
 </div>
-
+dashboard
     <ul nz-menu nzTheme="dark" nzMode="inline">
-      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+      <li nz-menu-item routerLink="/" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="dashboard"></span>
         <span>Dashboard</span>
       </li>
@@ -18,23 +18,71 @@
         <span>Add Tank</span>
       </li>
 
-      <li nz-menu-item routerLink="/reports" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="bar-chart"></span>
-        <span>Reports</span>
-      </li>
+    
 
       <li nz-menu-item routerLink="/users" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="user"></span>
         <span>users</span>
       </li>
 
+      <li nz-menu-item routerLink="/reports" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="bar-chart"></span>
+
+        <span>Reports</span>
+      </li>
+
+
+<nz-card nzTitle="Device Names" nzBordered="true" style="margin-top: 12px;">
+
+  <ul class="device-list">
+    <li *ngFor="let device of devices" class="device-item">
+      <span nz-icon nzType="tablet" style="margin-right: 8px;"></span>
+      {{ device.deviceName || device.name }}
+    </li>
+  
+  </ul>
+</nz-card>
+
+<!---
+<nz-card nzTitle="Device List" nzBordered="true">
+  <nz-table
+    [nzData]="devices"
+    [nzBordered]="true"
+    [nzSize]="'middle'"
+    [nzScroll]="{ x: '1000px' }"
+    [nzShowPagination]="false"
+  >
+    <thead>
+      <tr>
+        <th>Device ID</th>
+        <th>Device Name</th>
+        <th>IMEI</th>
+        <th>Area</th>
+        <th>Flow Multiplier</th>
+        <th>Start Date</th>
+        <th>Expiry Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let device of devices">
+       <td>{{ device.deviceId || device.id }}</td>
+        <td>{{ device.deviceName || device.name }}</td>
+        <td>{{ device.status || 'Unknown' }}</td>
+      </tr>
+    </tbody>
+  </nz-table>
+
+ 
+</nz-card>
+-->
+
+
+
 
     </ul>
   </nz-sider>
 
-  <!-- Main Content -->
   <nz-layout>
-    <!-- Header -->
     <nz-header style="background: #fff; padding: 0;">
       <span
         class="trigger"
@@ -44,18 +92,16 @@
         <i nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></i>
       </span>
 
-       <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout">
+       <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout" (click)="logout()">
         <span style="font-weight: bold;margin-left: 10px;">Agromation</span>
       <i nz-icon nzType="user" nzTheme="outline" style="font-size: 20px;"></i>
     </span>
     </nz-header>
 
-    <!-- Content -->
     <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 280px;">
       <router-outlet></router-outlet>
     </nz-content>
 
-    <!-- Footer -->
   <nz-footer style="text-align: center; padding: 1px 0 ; line-height: 30px; font-size: 15px;;">
   <span>AgromationIndia +91 92848 43301</span>
 </nz-footer>

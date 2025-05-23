@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
         name: 'Pump 1',
         redWireVoltage: 10,
         yellowWireVoltage: 0,
-        blueWireVoltage: 0,
+        blueWireVoltage: 20,
         redWireCurrent: 10,
         yellowWireCurrent: 0,
         blueWireCurrent: 10,

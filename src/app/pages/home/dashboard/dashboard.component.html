@@ -6,9 +6,15 @@
       width="70" 
       style="float:right"
     />
+     <span
+        class="motor-status-label"
+        [ngClass]="{ 'on': isPumpOn(device), 'off': !isPumpOn(device) }"
+      >
+        {{ isPumpOn(device) ? 'Motor ON' : 'Motor OFF' }}
+      </span>
     <div echarts [options]="device.chartOptions" class="square-tank-chart"></div>
- <div class="tank-label">
-  <ng-container *ngIf="!isEditing; else editMode">
+<!-- temp change name 
+    <ng-container *ngIf="!isEditing; else editMode">
     <button nz-button class="tank-button" (click)="editTankName()">
       {{ tankName }}
     </button>
@@ -23,7 +29,6 @@
       autofocus
     />
   </ng-template>
-</div>
-
+-->
   </div>
 </div>

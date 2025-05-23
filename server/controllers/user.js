@@ -4,10 +4,7 @@ require('dotenv').config();
 
 
 const createUser = async (req, res) => {
-   // console.log('Received body:', req.body); // Debugging line
-
-//console.log('Headers:', req.headers);
-
+   
   try {
 
 
