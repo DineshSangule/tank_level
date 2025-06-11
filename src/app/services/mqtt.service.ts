@@ -12,6 +12,7 @@ export class MqttService {
   private client: any;
   private messageSubject = new Subject<{ topic: string; message: string }>();
 
+  public devices: any = {};
   public data: any = {};
 
   constructor() {
@@ -19,7 +20,8 @@ export class MqttService {
 
   connect(devices: any) {
     devices.forEach((device: any) => {
-      this.data[device.uuid] = {}
+      this.devices[device.id] = device;
+      this.data[device.uuid] = {};
     });
     this.client = mqtt.connect("ws://mqtt.agromationindia.com/mqtt", {
       port: 80,
@@ -48,17 +50,20 @@ export class MqttService {
         level = 100;
       else if (ai[3])
         level = 80;
-      else if (ai[2])
+      else if (ai[2]>2)
         level = 60;
-      else if (ai[1])
+      else if (ai[1]>2)
         level = 40;
-      else if (ai[0])
+      else if (ai[0]>2)
         level = 20;
       else
         level = 0;
-      const pumpStatus = ai[5] ? 1 : 0;
-      const date = new Date();
-      this.data[imei] = { ai, level, pumpStatus, date };
+      data.date = new Date();
+      data.pumpStatus = ai[5] ? 1 : 0;
+      data.level = level;
+      data.ai = data['devices'][0]['ai'];
+      data.do = data['devices'][0]['do'];
+      this.data[imei] = data;
       console.log(this.data);
     });
   }
@@ -73,26 +78,9 @@ export class MqttService {
     });
   }
 
-   sendRelayCommand(uuid: string, index: number, value: 0 | 1): void {
-    // Get current ai array or initialize to zeros (assuming length 19)
-    const currentAi: number[] = this.data[uuid]?.ai || new Array(19).fill(0);
-
-    // Clone to avoid mutation
-    const newAi = [...currentAi];
-
-    // Set user-controlled index value
-    newAi[index] = value;
-
-    const topic = `vidani/vl/${uuid}/command`;
-    const payload = { ai: newAi };
-    const message = JSON.stringify(payload);
-
-    this.client.publish(topic, message, {}, (err: any) => {
-      if (err) {
-        console.error(`Publish error: ${err.message}`);
-      } else {
-        console.log(`Sent relay command to ${topic}:`, message);
-      }
-    });
+  publish(device_id: string|null, data: string): void {
+    const topic = `vidani/vl/${device_id}`;
+    this.client.publish(topic, data, (err: any) => { });
   }
+
 }

@@ -1,28 +1,56 @@
-/* scheduling */
+/* ---------------------- Global Fixes & Base ---------------------- */
+
+* {
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+.tank-cards,.control-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.tank-cards:hover,.control-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------------------- Scheduling ---------------------- */
 .chart-container {
   width: 100%;
   height: 300px;
 }
+
 .tank-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
 }
-  ::ng-deep .ant-card-head-title {
-    font-weight: bold;
-  }
+
+::ng-deep .ant-card-head-title {
+  font-weight: bold;
+}
 
 .square-tank-chart {
   width: 250px;
   height: 250px;
-  border: 4px solid #4A90E2;
-  border-radius: 0; /* Makes it square */
+  border-radius: 0;
   overflow: hidden;
 }
 
-/* Reports */
-
+/* ---------------------- Reports ---------------------- */
 .filter-card,
 .reports-card {
   margin-bottom: 24px;
@@ -32,7 +60,7 @@
 }
 
 .fetch-btn {
-  padding :6px;
+  padding: 6px;
   width: 100%;
   font-weight: 500;
   cursor: pointer;
@@ -70,10 +98,126 @@
     margin-top: 8px;
   }
 }
- 
 
-/* tank or control */
+/* ---------------------- Tank & Control ---------------------- */
+.sensor-warning {
+  color: red;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 10px;
+  animation: blink 1s infinite;
+}
 
+.sensor-fault-center {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  animation: blink 1s infinite;
+  z-index: 10;
+}
+
+.marker-warning {
+  position: absolute;
+  left: 0;
+  font-size: 16px;
+  color: red;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ---------------------- Map Section ---------------------- */
+
+#map {
+  height: 300px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+
+/* ---------------------- Card Layout ---------------------- */
+.card-content {
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.left-section {
+  flex: 1;
+  min-width: 250px;
+  padding: 16px;
+}
+
+.right-section {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media screen and (max-width: 1024px) {
+  .left-section,
+  .right-section {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
+  }
+}
+
+/* ---------------------- Switch Panel ---------------------- */
+.switch-header {
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.switch-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 5px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.2s ease;
+}
+
+.switch-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.label-on {
+  background-color: #4caf50;
+}
+
+.label-off {
+  background-color: #f44336;
+}
+
+.switch-label {
+  color: #fff;
+  padding: 4px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* ---------------------- Tank Display ---------------------- */
 .empty-text {
   position: absolute;
   top: 45%;
@@ -83,36 +227,86 @@
   font-weight: bold;
   font-size: 22px;
 }
+
 .app-header {
   background-color: #fff;
   display: flex;
   align-items: center;
 }
-
+.pump-status-corner {
+  margin-top: -30px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 6px;
+  z-index: 10;
+}
 
 .tank-wrapper {
+   position: relative; /* Important for absolute children */
+  float: left;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 1rem auto;
   min-width: 200px;
   width: 100%;
-  max-width: 300px;
-  height: 350px;
+  max-width: 400px;
+  height : 450px;
 }
 
 .cylinder {
   margin-top: 10px;
   position: relative;
-  width: 100%;
+  max-height: 300px;
+  width: 80%;
   aspect-ratio: 1 / 2;
-  background: linear-gradient(to top, #d4e6f9, #f1f6fc);
-  border-left: 8px solid #4a90e2;
-  border-right: 8px solid #4a90e2;
-  border-bottom: 12px solid #003f7f;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
+  background: linear-gradient(to top, #cfe9ff, #e8f3fc); /* lighter water gradient */
+  border-bottom: 14px solid #6c757d; /* darker for a metallic look */
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+.cylinder::before,
+.cylinder::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    #9e9e9e,
+    #b0b0b0 5px,
+    #888 6px,
+    #cfcfcf 10px
+  );
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.cylinder::before {
+  left: 0;
+}
+
+.cylinder::after {
+  right: 0;
+}
+.cylinder::after-bottom {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 14px;
+  background: repeating-linear-gradient(
+    to right,
+    #7a7a7a,
+    #a0a0a0 5px,
+    #7a7a7a 10px
+  );
+  z-index: 2;
+  border-radius: 0 0 6px 6px;
 }
 
 .fill {
@@ -125,22 +319,20 @@
   background-image: radial-gradient(black 3px, transparent 3px);
   background-size: 25px 10px;
   background-repeat: repeat;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-
 .fill-label {
   color: #fff;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 1.5vw, 1.4rem);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .marker {
-  margin-right: 20px;
+  margin-right: 30px;
   position: absolute;
   right: -8px;
   width: 10px;
@@ -152,22 +344,28 @@
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
 
+/* ---------------------- Pump Status ---------------------- 
 .pump-status {
-  margin-top: 12px;
+  top: 0;
+  right: 0;
+  padding: 6px;
+  z-index: 10;
   text-align: center;
-}
+} */
 
-.pump-status img {
-  width: 60px;
+.pump-status-corner img {
+  width: 55px;
   height: auto;
 }
 
 .motor-status-label {
+  margin-bottom: 5px;
+  margin-top: -30px;
+  font-size: 16px;
   font-weight: bold;
-  font-size: 14px;
-  padding: 6px 12px;
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  padding: 6px 6px;
   color: white;
-  margin-top: 6px;
   display: inline-block;
   border-radius: 6px;
 }
@@ -183,34 +381,192 @@
 @media screen and (min-width: 768px) {
   .tank-wrapper {
     max-width: 400px;
-    height: 500px;
+    height: 400px;
   }
 
   .pump-status img {
     width: 80px;
   }
 
-  .fill-label {
-    font-size: 1.4rem;
-  }
-
-  .motor-status-label {
-    font-size: 16px;
-    padding: 8px 16px;
-  }
 }
+
+/* ---------------------- Ant Tabs ---------------------- */
 ::ng-deep .ant-tabs-tab-active {
-  background-color: #1890ff !important; 
+  background-color: #1890ff !important;
   border-radius: 4px;
 }
 
 ::ng-deep .ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: white !important; 
-}
-::ng-deep .ant-tabs-tab:nth-child(2) {
-  background-color: green !important;
   color: white !important;
-  border-radius: 4px 4px 0 0;
+}
+
+/* ---------------------- Mobile Enhancements ---------------------- */
+@media screen and (max-width: 480px) {
+  .fill-label {
+    font-size: 1rem;
+  }
+
+  .motor-status-label {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .switch-header {
+    font-size: 16px;
+  }
+
+  .card-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+.tank-layout-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+/* Tank Card (unchanged logic and size) */
+
+
+/* Right Side Cards: Control + Map */
+.right-side-cards {
+  flex: 1 1 38%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Optional Styling for Control and Map Cards */
+.control-card{
+  width: 100%;
+}
+.map-card 
+{
+    min-width: 250px;
+
+}
+.tank-cards {
+  width: 450px;
+  max-height: 380px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .tank-layout-wrapper {
+    flex-direction: column;
+  }
+  .right-side-cards {
+    flex-direction: column;
+  }
+}
+
+.three-card-layout {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* Tank should take more space */
+
+
+/* Control and Map should be smaller */
+.control-card, .map-card {
+  flex: 1 1 23%;
+  min-width: 280px;
+}
+
+@media (max-width: 768px) {
+  .three-card-layout {
+    flex-direction: column;
+  }
+
+  .tank-cards,
+  .control-card,
+  .map-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+.big-switch .ant-switch {
+  height: 36px;
+  min-width: 70px;
+}
+.status-container {
+  display: flex;
+  flex-wrap: wrap; /* ✅ allow wrapping */
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  margin: -40px 0 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-label {
+  margin-right: 6px;
+  color: #555;
+}
+
+/* ✅ FORCE wrap on smaller screens */
+@media (max-width: 600px) {
+  .status-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-item {
+    margin-top: -10px;
+    margin-bottom: 20px;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+.switch-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.switch-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 100%; /* Full width on mobile */
+}
+
+@media (min-width: 768px) {
+  .switch-item {
+    flex: 1 1 calc(33.33% - 24px); /* 3 in a row on desktop */
+  }
+}
+::ng-deep .ant-tabs-nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .ant-tabs-nav-list > .ant-tabs-tab {
+    flex: 1 1 calc(50% - 10px); 
+    justify-content: center;
+  }
 }
 
 

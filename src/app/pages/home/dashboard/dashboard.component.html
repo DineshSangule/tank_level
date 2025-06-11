@@ -1,328 +1,413 @@
-    <nz-tabset nzType="card" >
-      <nz-tab nzTitle="Control" >
+@if (this.data && this.data['do'] == undefined) {
+  <nz-alert
+      nzType="info"
+      nzMessage="Please wait"
+      nzDescription="Connecting to device..."
+      nzShowIcon
+    ></nz-alert>
+} @else {
+<br>
 
-<nz-card >
-  <div class="tank-wrapper">
-    <div class="pump-status">
-      <img [src]="pumpStatus ? 'on.png' : 'off.png'" alt="Pump Status" />
-    </div>
+  <h3 style="margin-top: -30px;text-align: center;    color: #1d39c4;
+"> {{ device?.name || device?.deviceName || 'Unknown' }}</h3><br>
+
+<h3 style="margin-bottom:20px ;"></h3>
+<div class="status-container">
+  <div class="status-items">
     <span
-      class="motor-status-label"
-      [ngClass]="{ 'on': isPumpOn(), 'off': !isPumpOn() }"
-    >
-      {{ isPumpOn() ? 'Motor ON' : 'Motor OFF' }}
+      class="status-dot"
+      [ngStyle]="{
+        'background-color': deviceOnline ? 'green' : 'red'
+      }">
     </span>
+    <span>{{ deviceOnline ? 'Online' : 'Offline' }}</span>
+  </div>
 
-    <div class="cylinder">
-      <div *ngIf="isTankEmpty()" class="empty-text">
-    <strong>Tank is Empty ⚠️</strong><br>
-  
+  <div *ngIf="lastReceivedTimestamp" class="status-item">
+    <span class="status-label">Last Received:</span>
+    <span>{{ lastReceivedTimestamp | date: 'shortTime' }}</span>
+  </div>
 </div>
 
-      <div
-        class="fill"
-        [ngStyle]="{
-          height: level + '%'
-        }"
-      >
-        <div class="fill-label" *ngIf="level > 0">
-           {{ level }}%</div>
-      </div>
 
-      <div
-        *ngFor="let marker of getMarkers()"
-        class="marker"
-        [ngStyle]="{ bottom: marker.bottom, backgroundColor: marker.color }"
-      ></div>
 
-      <div class="bottom"></div>
-    </div>
-    </div>
 
+<nz-tabset nzType="card" style="margin-top: -30px;">
+  <nz-tab nzTitle="💧Tank Level">
+    <div class="three-card-layout">
+      <nz-card class="tank-cards">
+        <div class="tank-wrapper">
+          <div class="pump-status-corner">
+            <img [src]="this.data.pumpStatus ? 'on.png' : 'off.png'" alt="Pump Status" style="margin-left: 20px;"/>
+          </div>
+          <span class="motor-status-label" [ngClass]="{ 'on': isPumpOn(), 'off': !isPumpOn() }">
+            {{ isPumpOn() ? 'Motor Is ON' : 'Motor Is OFF' }}
+          </span>
+
+          <div class="cylinder">
+            <div *ngIf="isTankEmpty()" class="empty-text">
+              <strong>Below 20% </strong><br />
+            </div>
+
+            <div class="fill" [ngStyle]="{ height: this.data.level + '%' }">
+              <div class="fill-label" *ngIf="level > 0">{{ level }}% Filled</div>
+            </div>
+
+            <div *ngFor="let marker of getMarkers()">
+              <div *ngIf="marker.isFault" class="sensor-warning">
+                ⚠️ Sensor Fault Detected!
+              </div>
+            </div>
+
+            <div *ngFor="let marker of getMarkers()" class="marker"
+              [ngStyle]="{ bottom: marker.bottom, backgroundColor: marker.color }">
+              <div *ngIf="marker.isFault" class="marker-warning">⚠️</div>
+            </div>
+          </div>
+          <div class="bottom"></div>
+        </div>
+      </nz-card>
+
+      <!-- Control Switches Card -->
+ <nz-card  class="control-card">
+ <div class="switch-container">
+  <!-- Switch 1 -->
+  <div
+    class="switch-item"
+    [ngStyle]="{
+      'background-color': data?.do?.[0] ? '#e6ffe6' : '#ffe6e6',
+      'border': '1px solid',
+      'border-color': data?.do?.[0] ? '#4caf50' : '#f44336'
+    }"
+  >
+    <span
+      [ngStyle]="{
+        'background-color': data?.do?.[0] ? '#4caf50' : '#f44336',
+        color: 'white',
+        padding: '4px 8px',
+        'border-radius': '4px',
+        'min-width': '70px',
+        'text-align': 'center'
+      }"
+    >
+      Switch 1
+    </span>
+    <nz-switch
+      [ngModel]="data?.do?.[0]"
+      [nzLoading]="data?.do?.[0] == undefined"
+      [nzCheckedChildren]="'ON'"
+      [nzUnCheckedChildren]="'OFF'"
+      (click)="toggleSwitch(1, data?.do?.[0] ? 0 : 1)"
+    ></nz-switch>
+  </div>
+
+  <!-- Switch 2 -->
+  <div
+    class="switch-item"
+    [ngStyle]="{
+      'background-color': data?.do?.[1] ? '#e6ffe6' : '#ffe6e6',
+      'border': '1px solid',
+      'border-color': data?.do?.[1] ? '#4caf50' : '#f44336'
+    }"
+  >
+    <span
+      [ngStyle]="{
+        'background-color': data?.do?.[1] ? '#4caf50' : '#f44336',
+        color: 'white',
+        padding: '4px 8px',
+        'border-radius': '4px',
+        'min-width': '70px',
+        'text-align': 'center'
+      }"
+    >
+      Switch 2
+    </span>
+    <nz-switch
+      [ngModel]="data?.do?.[1]"
+      [nzLoading]="data?.do?.[1] == undefined"
+      [nzCheckedChildren]="'ON'"
+      [nzUnCheckedChildren]="'OFF'"
+      (click)="toggleSwitch(2, data?.do?.[1] ? 0 : 1)"
+    ></nz-switch>
+  </div>
+
+  <!-- Switch 3 -->
+  <div
+    class="switch-item"
+    [ngStyle]="{
+      'background-color': data?.do?.[2] ? '#e6ffe6' : '#ffe6e6',
+      'border': '1px solid',
+      'border-color': data?.do?.[2] ? '#4caf50' : '#f44336'
+    }"
+  >
+    <span
+      [ngStyle]="{
+        'background-color': data?.do?.[2] ? '#4caf50' : '#f44336',
+        color: 'white',
+        padding: '4px 8px',
+        'border-radius': '4px',
+        'min-width': '70px',
+        'text-align': 'center'
+      }"
+    >
+      Switch 3
+    </span>
+    <nz-switch
+      [ngModel]="data?.do?.[2]"
+      [nzLoading]="data?.do?.[2] == undefined"
+      [nzCheckedChildren]="'ON'"
+      [nzUnCheckedChildren]="'OFF'"
+      (click)="toggleSwitch(3, data?.do?.[2] ? 0 : 1)"
+    ></nz-switch>
+  </div>
+</div>
+
+
+
+      <div style="flex-grow: 1; margin-top: 20px;">
+
+
+ <nz-card class="control-card">
+    <div id="map" style="height: 200px; width: 100%; border-radius: 8px;"></div>
 </nz-card>
+   
+      </div>
+  </nz-card>
+  </div>
+  </nz-tab>
 
-<button nz-button nzType="primary" (click)="turnOnRelay('861826074288388')">Relay ON</button>
-<button nz-button nzType="default" (click)="turnOffRelay('861826074288388')">Relay OFF</button>
 
 
-</nz-tab>
-
+  <!---
      <nz-tab nzTitle="Turn On"(nzSelect)="turnOnClick()" 
  style="background-color: green;"></nz-tab>
+-->
+  <nz-tab nzTitle="🕒Scheduling">
 
-      <nz-tab nzTitle="🕒Scheduling" >  
+    <nz-card nzTitle="Time Scheduling" style="max-width: 800px; margin: auto;">
 
-        <nz-card nzTitle="Time Scheduling" style="max-width: 800px; margin: auto;">
-
-  <div
-    style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; text-align: center;"
-  >
-    <div style="width: 150px;"></div>
-    <div style="flex: 1;">
-      <div
-        style="background-color: green; color: white; width: 100px; height: 30px;
-               line-height: 30px; border-radius: 4px; margin: 0 auto;"
-      >
-        On Time
-      </div>
-    </div>
-    <div style="flex: 1;">
-      <div
-        style="background-color: red; color: white; width: 100px; height: 30px;
-               line-height: 30px; border-radius: 4px; margin: 0 auto;"
-      >
-        Off Time
-      </div>
-    </div>
-    <div style="width: 120px;"></div>
-  </div>
-
-  <div
-    *ngFor="let slot of timeSlots; let i = index"
-    style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;"
-  >
-    <div style="width: 150px; display: flex; align-items: center; gap: 8px;">
-      <label>Enable:</label>
-      <nz-switch [(ngModel)]="slot.enabled"></nz-switch>
-    </div>
-
-    <div style="flex: 1; min-width: 150px;">
-      <nz-time-picker
-        [(ngModel)]="slot.onTime"
-        [nzDisabled]="!slot.enabled"
-        [nzFormat]="'HH:mm'"
-        style="width: 100%;"
-      ></nz-time-picker>
-    </div>
-
-    <div style="flex: 1; min-width: 150px;">
-      <nz-time-picker
-        [(ngModel)]="slot.offTime"
-        [nzDisabled]="!slot.enabled"
-        [nzFormat]="'HH:mm'"
-        style="width: 100%;"
-      ></nz-time-picker>
-    </div>
-
-    <div style="width: 120px;">
-      <button
-        nz-button
-        nzType="primary"
-        [disabled]="!slot.enabled"
-        (click)="submitTimeSlot(i)"
-        style="width: 100%;"
-      >
-        Update
-      </button>
-    </div>
-  </div>
-
-  <button nz-button nzType="dashed" (click)="addTimeSlot()" style="margin: 0 auto; display: block;">
-    + Add Time Slot
-  </button>
-</nz-card>
-
-      </nz-tab>
-      <nz-tab nzTitle="📝 Reports">
-
-  <nz-card nzTitle="Daily Report " class="filter-card"> 
-  <div class="filter-row" nz-row nzGutter="16" style="align-items: center;">
-    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="24" nzFor="dailyDeviceId">Device ID</nz-form-label>
-        <nz-form-control [nzSpan]="24">
-          <input nz-input [(ngModel)]="dailyDeviceId" type="number" id="dailyDeviceId" placeholder="Enter Device ID" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-
-    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="24" nzFor="dailyFromDate">From Date</nz-form-label>
-        <nz-form-control [nzSpan]="24">
-          <input nz-input [(ngModel)]="dailyFromDate" type="date" id="dailyFromDate" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-
-    <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="24" nzFor="dailyToDate">To Date</nz-form-label>
-        <nz-form-control [nzSpan]="24">
-          <input nz-input [(ngModel)]="dailyToDate" type="date" id="dailyToDate" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-  </div>
- <div nz-row nzGutter="8" class="button-wrapper">
-  <div nz-col nzXs="24" nzSm="12">
-    <button nz-button nzType="primary" (click)="fetchDailyReports()" class="fetch-btn" style="width: 100%;background-color:#1890ff;border:4px;">
-      Get Data
-    </button>
-  </div>
-  <div nz-col nzXs="24" nzSm="12">
-    <button nz-button nzType="default" class="fetch-btn"  style="width: 100%;">
-      Export Data
-    </button>
-  </div>
-</div>
-
-
-</nz-card>
-
-
-
-<div nzTitle="Daily Reports" *ngIf="dailyReports.length > 0" class="reports-card">
-  <div class="table-responsive-wrapper">
-    <nz-table
-      [nzData]="dailyReports"
-      [nzFrontPagination]="false"
-      [nzPageSize]="10"
-      [nzSize]="'middle'"
-      [nzBordered]="true"
-    >
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Tank Level</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of dailyReports">
-          <td>{{ row.date | date: 'HH.mm' }}</td>
-          <td>{{ row.level }}</td>
-        </tr>
-      </tbody>
-    </nz-table>
-  </div>
- </div>
-
-
-       
-      </nz-tab>
-          <nz-tab nzTitle="🔧Config" >
-
-
-            <div class="config-section">
-    <nz-collapse>
-        <nz-collapse-panel
-        *ngFor="let panel of panel;track: panel"
-        [nzHeader]="panel.name"
-        [nzActive]="panel.active"
-        [nzShowArrow]="panel.arrow">
-
-
-        <h1 style="margin-bottom: 10px;">
-    Update Device
-  </h1>
-  
-  <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-    <div style="flex: 1; ">
-      <nz-card>
-        <form nz-form [nzLayout]="'vertical'"  #deviceFrom="ngForm">
-          <nz-form-item>
-            <nz-form-label [nzRequired]="true">Device ID</nz-form-label>
-            <nz-form-control>
-              <input nz-input name="deviceId"   placeholder="Enter Device ID" type="number" required/>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item>
-            <nz-form-label [nzRequired]="true">User ID</nz-form-label>
-            <nz-form-control>
-              <input nz-input name="userId"  placeholder="Enter User ID" type="text" />
-            </nz-form-control>
-          </nz-form-item>
-  
-          <nz-form-item>
-            <nz-form-label [nzRequired]="true">Device Name</nz-form-label>
-            <nz-form-control>
-              <input nz-input  name="deviceName"   placeholder="Enter Device Name" type="text" />
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item>
-            <nz-form-label>IMEI Number</nz-form-label>
-            <nz-form-control>
-              <input  nz-input name="imei"  placeholder="Enter IMEI Number" type="text" />
-            </nz-form-control>
-          </nz-form-item>
-  
-          <nz-form-item>
-            <nz-form-label>Area</nz-form-label>
-            <nz-form-control>
-              <input nz-input name="area"  placeholder="Enter Area" type="text" />
-            </nz-form-control>
-          </nz-form-item>
-  
-          <nz-form-item>
-            <nz-form-label>Flow Multiplier</nz-form-label>
-            <nz-form-control>
-              <input nz-input name="flowMultiplier" type="number"  placeholder="Enter Flow Multiplier" />
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item>
-            <nz-form-label>Start Date</nz-form-label>
-            <nz-form-control>
-              <nz-date-picker
-              name="startDate"
-             
-              [nzFormat]="'dd-MM-yyyy'"
-              >
-            </nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-  
-          <nz-form-item>
-            <nz-form-label>Expiry Date</nz-form-label>
-            <nz-form-control>
-              <nz-date-picker
-              name="expiryDate"
-        
-              [nzFormat]="'dd-MM-yyyy'">
-            </nz-date-picker>
-            </nz-form-control>
-          </nz-form-item>
-  
-  
-          <div style="text-align: center; margin-top: 20px;">
-            <button nz-button nzType="primary" style="padding: 0 30px;"[disabled]="!deviceFrom.form.valid">Update</button>
+      <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; text-align: center;">
+        <div style="width: 150px;"></div>
+        <div style="flex: 1;">
+          <div style="background-color: green; color: white; width: 100px; height: 30px;
+               line-height: 30px; border-radius: 4px; margin: 0 auto;">
+            On Time
           </div>
-        </form>
-      </nz-card>
+        </div>
+        <div style="flex: 1;">
+          <div style="background-color: red; color: white; width: 100px; height: 30px;
+               line-height: 30px; border-radius: 4px; margin: 0 auto;">
+            Off Time
+          </div>
+        </div>
+        <div style="width: 120px;"></div>
+      </div>
+
+      <div *ngFor="let slot of timeSlots; let i = index"
+        style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+        <div style="width: 150px; display: flex; align-items: center; gap: 8px;">
+          <label>Enable:</label>
+          <nz-switch [(ngModel)]="slot.enabled"></nz-switch>
+        </div>
+
+        <div style="flex: 1; min-width: 150px;">
+          <nz-time-picker [(ngModel)]="slot.onTime" [nzDisabled]="!slot.enabled" [nzFormat]="'HH:mm'"
+            style="width: 100%;"></nz-time-picker>
+        </div>
+
+        <div style="flex: 1; min-width: 150px;">
+          <nz-time-picker [(ngModel)]="slot.offTime" [nzDisabled]="!slot.enabled" [nzFormat]="'HH:mm'"
+            style="width: 100%;"></nz-time-picker>
+        </div>
+
+        <div style="width: 120px;">
+          <button nz-button nzType="primary" [disabled]="!slot.enabled" (click)="submitTimeSlot(i)"
+            style="width: 100%;">
+            Update
+          </button>
+        </div>
+      </div>
+
+      <button nz-button nzType="dashed" (click)="addTimeSlot()" style="margin: 0 auto; display: block;">
+        + Add Time Slot
+      </button>
+    </nz-card>
+
+  </nz-tab>
+  <nz-tab nzTitle="📝 Reports">
+
+    <nz-card nzTitle="Daily Report " class="filter-card">
+      <div class="filter-row" nz-row nzGutter="16" style="align-items: center;">
+        <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="dailyDeviceId">Device ID</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <input nz-input [(ngModel)]="dailyDeviceId" type="number" id="dailyDeviceId"
+                placeholder="Enter Device ID" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="dailyFromDate">From Date</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <input nz-input [(ngModel)]="dailyFromDate" type="date" id="dailyFromDate" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="dailyToDate">To Date</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <input nz-input [(ngModel)]="dailyToDate" type="date" id="dailyToDate" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row nzGutter="8" class="button-wrapper">
+        <div nz-col nzXs="24" nzSm="12">
+          <button nz-button nzType="primary" (click)="fetchDailyReports()" class="fetch-btn"
+            style="width: 100%;background-color:#1890ff;border:4px;">
+            Get Data
+          </button>
+        </div>
+        <div nz-col nzXs="24" nzSm="12">
+          <button nz-button nzType="default" class="fetch-btn" style="width: 100%;">
+            Export Data
+          </button>
+        </div>
+      </div>
+
+
+    </nz-card>
+
+
+
+    <div nzTitle="Daily Reports" *ngIf="dailyReports.length > 0" class="reports-card">
+      <div class="table-responsive-wrapper">
+        <nz-table [nzData]="dailyReports" [nzFrontPagination]="false" [nzPageSize]="10" [nzSize]="'middle'"
+          [nzBordered]="true">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Tank Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of dailyReports">
+              <td>{{ row.date | date: 'HH.mm' }}</td>
+              <td>{{ row.level }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
     </div>
-  
-    <div style="flex: 1; ">
-      <nz-card nzTitle="Location">
-        <iframe
-          width="100%"
-          height="314"
-          style="border: 0;"
-          loading="lazy"
-          allowfullscreen
-          src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=Eiffel+Tower,Paris+France"
-        ></iframe>
-      </nz-card>
-    </div>
-    
-  </div>
-  
+
+
+
+  </nz-tab>
+ 
+  <nz-tab nzTitle="🔧Config">
+
+    <div class="config-section">
+      <nz-collapse>
+        <nz-collapse-panel *ngFor="let panel of panel;track: panel" [nzHeader]="panel.name" [nzActive]="panel.active"
+          [nzShowArrow]="panel.arrow">
+
+
+          <h1 style="margin-bottom: 10px;">
+            Update Device
+          </h1>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            <div style="flex: 1; ">
+              <nz-card>
+                <form nz-form [nzLayout]="'vertical'" #deviceFrom="ngForm">
+                  <nz-form-item>
+                    <nz-form-label [nzRequired]="true">Device ID</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="deviceId" placeholder="Enter Device ID" type="number" required />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label [nzRequired]="true">User ID</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="userId" placeholder="Enter User ID" type="text" />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label [nzRequired]="true">Device Name</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="deviceName" placeholder="Enter Device Name" type="text" />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label>IMEI Number</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="imei" placeholder="Enter IMEI Number" type="text" />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label>Area</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="area" placeholder="Enter Area" type="text" />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label>Flow Multiplier</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input name="flowMultiplier" type="number" placeholder="Enter Flow Multiplier" />
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label>Start Date</nz-form-label>
+                    <nz-form-control>
+                      <nz-date-picker name="startDate" [nzFormat]="'dd-MM-yyyy'">
+                      </nz-date-picker>
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label>Expiry Date</nz-form-label>
+                    <nz-form-control>
+                      <nz-date-picker name="expiryDate" [nzFormat]="'dd-MM-yyyy'">
+                      </nz-date-picker>
+                    </nz-form-control>
+                  </nz-form-item>
+
+
+                  <div style="text-align: center; margin-top: 20px;">
+                    <button nz-button nzType="primary" style="padding: 0 30px;"
+                      [disabled]="!deviceFrom.form.valid">Update</button>
+                  </div>
+                </form>
+              </nz-card>
+            </div>
+
+            <div style="flex: 1; ">
+              <nz-card>
+                <div id="map" style="height: 201px; width: 100%;"></div>
+              </nz-card>
+            </div>
+
+          </div>
+
 
         </nz-collapse-panel>
-    </nz-collapse>
-</div> 
-         
-      </nz-tab>
- </nz-tabset>
-   
+      </nz-collapse>
+    </div>
 
-<!---
-<pre>
-  {{this.mqtt.data | json}} 
-</pre>
--->
+  </nz-tab>
+  
 
+</nz-tabset>
 
-
-
+}

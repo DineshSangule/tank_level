@@ -13,16 +13,15 @@ import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { MqttService } from '../../../services/mqtt.service';
 import { AuthService } from '../../../services/auth.service';
-export interface tank 
-{
-  tankname:string;
-  level:number;
-  status:string;
+export interface tank {
+  tankname: string;
+  level: number;
+  status: string;
 }
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [     NzProgressModule,
+  imports: [NzProgressModule,
     NzSwitchModule, NzTableModule,
     CommonModule,
     NzCardModule,
@@ -38,19 +37,19 @@ export class MainDashboardComponent implements OnInit {
   devices: any[] = [];
   aiValues: number[] = []
   selectedUUID: string | null = null;
-  level: number = 0;
-  pumpStatus: number = 0;
 
-  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService,public Mqtt:MqttService
+  data: any = {};
+
+  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService, public Mqtt: MqttService
   ) { }
 
- 
+
 
   ngOnInit(): void {
     this.loadDevices(),
-       setInterval(() => {
-      this.updateDeviceData();
-    }, 1000);
+      setInterval(() => {
+        this.updateDeviceData();
+      }, 1000);
   }
 
   loadDevices(): void {
@@ -59,6 +58,12 @@ export class MainDashboardComponent implements OnInit {
         console.log('API response:', res);
         if (res.success && Array.isArray(res.data)) {
           this.devices = res.data;
+          res.data.forEach((device:any) => {
+              this.data[device.id] = {
+                level:null,
+                pumpStatus:null
+              }
+          });
           this.Mqtt.connect(res.data);
         } else {
           this.message.warning('No devices found.');
@@ -71,34 +76,29 @@ export class MainDashboardComponent implements OnInit {
     });
   }
 
- updateDeviceData(): void {
-    if (!this.selectedUUID) {
-      const keys = Object.keys(this.Mqtt.data);
-      if (keys.length > 0) {
-        this.selectedUUID = keys[0];
-      }
-    }
+  updateDeviceData(): void {
+    this.devices.forEach(device => {
+      const deviceData = this.Mqtt.data[device.uuid];
+      this.data[device.id].level = deviceData.level;
+      this.data[device.id].pumpStatus = deviceData.pumpStatus;
 
-    if (this.selectedUUID && this.Mqtt.data[this.selectedUUID]) {
-      const deviceData = this.Mqtt.data[this.selectedUUID];
-      this.level = deviceData.level;
-      this.pumpStatus = deviceData.pumpStatus;
-
-      if(Array.isArray(deviceData.ai))
-      {
-        this.aiValues = deviceData.ai;
+      if (Array.isArray(deviceData.ai)) {
+        this.data[device.id].aiValues = deviceData.ai;
       }
-      
-      console.log('Level:', this.level, 'Pump Status:', this.pumpStatus);
-    }
-  }
-  isPumpOn(): boolean {
-    return this.pumpStatus === 1;
-  }
- 
-  openDevice()
-  {
-    this.router.navigate(['/dashboard'])
+
+      console.log('Level:', this.data[device.id].level, 'Pump Status:', this.data[device.id].pumpStatus);
+    
+  });
   }
   
+  isPumpOn(id:number): boolean {
+    return this.data[id].pumpStatus === 1;
+  }
+
+  openDevice(id: number) {
+    this.router.navigate(['/dashboard', id])
+  }
+
+
+
 }

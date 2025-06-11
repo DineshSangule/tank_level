@@ -11,7 +11,7 @@
         <span>Dashboard</span>
       </li>
 
-      
+    <!---
       <li nz-menu-item routerLink="/addtank" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="plus"></span>
         <span>Add Tank</span>
@@ -23,7 +23,7 @@
         <span nz-icon nzType="user"></span>
         <span>users</span>
       </li>
-<!---
+
       <li nz-menu-item routerLink="/reports" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="bar-chart"></span>
 
@@ -39,7 +39,6 @@
       <a (click)="goToDashboard()">      
 
       {{ device.deviceName || device.name }}
-      {{device.uuid}}
       </a>
     </li>
     
@@ -94,7 +93,9 @@
         (click)="isCollapsed = !isCollapsed"
       >
         <i nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></i>
+
       </span>
+              <span style="font-weight: bold;font-size: larger;">Tank Level Monitoring System</span>
 
        <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout" (click)="logout()">
         <span style="font-weight: bold;margin-left: 10px;"*ngFor="let device of devices">{{device.name}}</span>
@@ -107,7 +108,7 @@
     </nz-content>
 
   <nz-footer style="text-align: center; padding: 1px 0 ; line-height: 30px; font-size: 15px;;">
-  <span>AgromationIndia +91 92848 43301</span>
+  <span>Copyright © 2025 Agromation India All rights reserved.</span>
 </nz-footer>
 
 </nz-layout>

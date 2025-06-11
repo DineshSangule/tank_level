@@ -2,22 +2,23 @@
   <div class="card-grid">
  
     <ng-container *ngFor="let device of devices">
-      <nz-card 
-        class="dashboard-card"
-        [nzTitle]="device.name"
-        [nzHoverable]="true"
-        (click)="openDevice()"
-      >
+   <nz-card
+  class="dashboard-card"
+  [nzTitle]="device.name"
+  [nzHoverable]="true"
+  (click)="openDevice(device.id)"
+  [ngClass]="{ 'card-title-on': data[device.id]?.pumpStatus, 'card-title-off': !data[device.id]?.pumpStatus }"
+>
 
 
 <div class="card-content">
   <div class="tank-container" >
     <div class="tank">
-      <div class="water" [style.height.%]="level">
-        <div class="inside-label">{{ level }}%</div>
+      <div class="water" [style.height.%]="data[device.id]?.level">
+        <div class="inside-label">{{ data[device.id]?.level }}%</div>
       </div>
     </div>
-    <div class="status-label"[ngClass]="{ 'on': pumpStatus, 'off': !pumpStatus }">Motor {{ pumpStatus ? 'ON' : 'OFF' }}</div>
+    <div class="status-label"[ngClass]="{ 'on': data[device.id]?.pumpStatus, 'off': !data[device.id]?.pumpStatus }">Motor {{ data[device.id]?.pumpStatus ? 'ON' : 'OFF' }}</div>
   </div>
 
   <div class="divider"></div>
@@ -26,7 +27,7 @@
               <p><strong>Location:</strong> {{ device.location }}</p>
               <p><strong>Area:</strong> {{ device.area }}</p>
             </div>
-            </div>
+          </div>
       </nz-card>
     </ng-container>
   </div>

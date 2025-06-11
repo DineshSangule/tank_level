@@ -114,3 +114,14 @@
   color: #333;
 }
 
+/* Title when motor is ON */
+::ng-deep .card-title-on .ant-card-head {
+  background-color: #4CAF50 !important; /* Green */
+  color: white;
+}
+
+/* Title when motor is OFF */
+::ng-deep .card-title-off .ant-card-head {
+  background-color: #f44336 !important; /* Red */
+  color: white;
+}
