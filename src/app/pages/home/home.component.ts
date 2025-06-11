@@ -12,6 +12,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 
 
 import { AuthService } from '../../services/auth.service';
+import { MqttService } from '../../services/mqtt.service';
 
 export interface tank {
   tankName: string;
@@ -21,9 +22,9 @@ export interface tank {
 
 @Component({
   selector: 'app-home',
-  standalone: true, 
+  standalone: true,
   imports: [
-    NzTableModule ,
+    NzTableModule,
     CommonModule,
     NzCardModule,
     NzMenuModule,
@@ -33,34 +34,34 @@ export interface tank {
     RouterModule
   ],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'] 
+  styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
   isCollapsed = false;
-  showTanks = false; 
+  showTanks = false;
   devices: any[] = [];
   token: string = '';
   showDeviceList = false;
-error = '';
+  error = '';
 
-  constructor(private eRef: ElementRef, private auth: AuthService,private router: Router,    private message: NzMessageService
-) {}
+  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService,private Mqtt:MqttService
+  ) { }
 
   toggleDeviceList(): void {
-  this.showDeviceList = !this.showDeviceList;
-}
+    this.showDeviceList = !this.showDeviceList;
+  }
 
 
   onBreakpoint(collapsed: boolean): void {
     this.isCollapsed = collapsed;
   }
 
- logout(): void{
-  localStorage.removeItem('token');
-  this.router.navigate(['/login']);
- }
+  logout(): void {
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
+  }
 
-ngOnInit(): void {
+  ngOnInit(): void {
     this.loadDevices();
   }
 
@@ -70,6 +71,7 @@ ngOnInit(): void {
         console.log('API response:', res);
         if (res.success && Array.isArray(res.data)) {
           this.devices = res.data;
+          this.Mqtt.connect(res.data);
         } else {
           this.message.warning('No devices found.');
         }
@@ -81,7 +83,11 @@ ngOnInit(): void {
     });
   }
 
-    toggleTanks() {
+  toggleTanks() {
     this.showTanks = !this.showTanks;
+  }
+  goToDashboard()
+  {
+    this.router.navigate(['/dashboard'])
   }
 }

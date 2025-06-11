@@ -1,8 +1,8 @@
 import { IClientOptions } from 'mqtt';
 
 export const MQTT_SERVICE_OPTIONS: IClientOptions = {
-  hostname: 'broker.hivemq.com',
-  port: 8000,
+  hostname: 'mqtt.agromationindia.com',
+  port: 20011,
   protocol: 'ws',
   clientId: 'angular-mqtt-client-' + Math.random().toString(16).substr(2, 8),
   connectTimeout: 4000,

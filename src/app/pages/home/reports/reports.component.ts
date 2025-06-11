@@ -11,12 +11,9 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import * as XLSX from 'xlsx';
-import * as FileSaver from 'file-saver';
 
 import { NzSelectModule } from 'ng-zorro-antd/select';
 
-import { format } from 'date-fns';  
 
  export interface HourlyReport {
    time: string;   
@@ -97,7 +94,8 @@ fetchMonthlyReports(): void {
       }
     });
 }
-
+}
+/*
  exportToExcel(type: 'daily' | 'monthly'): void {
   let dataToExport: any[] = [];
 
@@ -125,4 +123,4 @@ fetchMonthlyReports(): void {
 
   FileSaver.saveAs(dataBlob, `${type}-report.xlsx`);
 }
-}
+}*/

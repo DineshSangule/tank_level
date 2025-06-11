@@ -1,0 +1,33 @@
+<div class="dashboard-container">
+  <div class="card-grid">
+ 
+    <ng-container *ngFor="let device of devices">
+      <nz-card 
+        class="dashboard-card"
+        [nzTitle]="device.name"
+        [nzHoverable]="true"
+        (click)="openDevice()"
+      >
+
+
+<div class="card-content">
+  <div class="tank-container" >
+    <div class="tank">
+      <div class="water" [style.height.%]="level">
+        <div class="inside-label">{{ level }}%</div>
+      </div>
+    </div>
+    <div class="status-label"[ngClass]="{ 'on': pumpStatus, 'off': !pumpStatus }">Motor {{ pumpStatus ? 'ON' : 'OFF' }}</div>
+  </div>
+
+  <div class="divider"></div>
+
+            <div class="info-box">
+              <p><strong>Location:</strong> {{ device.location }}</p>
+              <p><strong>Area:</strong> {{ device.area }}</p>
+            </div>
+            </div>
+      </nz-card>
+    </ng-container>
+  </div>
+</div>
