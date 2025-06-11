@@ -7,7 +7,6 @@
     ></nz-alert>
 } @else {
 <br>
-
   <h3 style="margin-top: -30px;text-align: center;    color: #1d39c4;
 "> {{ device?.name || device?.deviceName || 'Unknown' }}</h3><br>
 
@@ -24,7 +23,7 @@
   </div>
 
   <div *ngIf="lastReceivedTimestamp" class="status-item">
-    <span class="status-label">Last Received:</span>
+    <span class="status-label">Last Config:</span>
     <span>{{ lastReceivedTimestamp | date: 'shortTime' }}</span>
   </div>
 </div>

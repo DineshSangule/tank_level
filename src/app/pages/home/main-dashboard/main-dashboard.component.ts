@@ -13,6 +13,8 @@ import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { MqttService } from '../../../services/mqtt.service';
 import { AuthService } from '../../../services/auth.service';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+
 export interface tank {
   tankname: string;
   level: number;
@@ -21,7 +23,7 @@ export interface tank {
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [NzProgressModule,
+  imports: [NzProgressModule,NzAlertModule,
     NzSwitchModule, NzTableModule,
     CommonModule,
     NzCardModule,

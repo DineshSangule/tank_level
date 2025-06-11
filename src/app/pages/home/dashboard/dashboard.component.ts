@@ -93,7 +93,6 @@ updateDeviceData(): void {
       this.aiValues = this.data.ai;
     }
 
-    // Save timestamp of last data received
     this.lastReceivedTimestamp = Date.now();
     this.lastReceivedTime = new Date(this.lastReceivedTimestamp).toLocaleString();
     this.deviceOnline = true;
@@ -101,9 +100,15 @@ updateDeviceData(): void {
     console.log('Device Name:', this.device?.name || this.device?.deviceName);
     console.log('Level:', this.level, 'Pump Status:', this.pumpStatus);
     console.log('Last Received:', this.lastReceivedTime);
+
+    if (this.device?.latitude && this.device?.longitude) {
+      console.log('Latitude:', this.device.latitude);
+      console.log('Longitude:', this.device.longitude);
+    } else {
+      console.warn('Latitude or Longitude is missing in the selected device.');
+    }
   }
 }
-
 
 
   isPumpOn(): boolean {
@@ -151,9 +156,15 @@ updateDeviceData(): void {
   }
 
 
-  isTankEmpty(): boolean {
-    return this.aiValues.slice(0, 5).every(value => value === 0);
-  }
+isTankEmpty(): boolean {
+  const firstThree = this.aiValues.slice(0, 3);
+  const nextTwo = this.aiValues.slice(3, 5);
+
+  const firstThreeCondition = firstThree.every(value => value < 3);
+  const nextTwoCondition = nextTwo.every(value => value === 0);
+
+  return firstThreeCondition && nextTwoCondition;
+}
 
   //scheduling 
 
@@ -282,10 +293,13 @@ updateDeviceData(): void {
 
   private async initMap(): Promise<void> {
   const L = await import('leaflet');
+const lat = this.device?.lat || 0;
+const lng = this.device?.lng || 0;
+
 
   this.map = L.map('map', {
-    center: [18.5910, 73.7396],
-    zoom: 25,
+    center: [lat, lng],
+    zoom: 12,
   });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -294,20 +308,19 @@ updateDeviceData(): void {
 
   const redIcon = L.icon({
     iconUrl: 'off.png',
-
     shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    iconSize: [70,50],
+    iconSize: [70, 50],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
   });
 
-  const marker = L.marker([18.5910, 73.7396], { icon: redIcon }).addTo(this.map);
-
+  const marker = L.marker([lat, lng], { icon: redIcon }).addTo(this.map);
 
   marker.bindTooltip(() => {
     return `
       <b>Device Info</b><br>
+       Device Name: ${this.device?.name || this.device?.deviceName}<br>
       Level: ${this.level}<br>
       Pump Status: ${this.pumpStatus === 1 ? 'ON' : 'OFF'}
     `;
@@ -316,10 +329,13 @@ updateDeviceData(): void {
   setInterval(() => {
     marker.setTooltipContent(`
       <b>Device Info</b><br>
+      Device Name: ${this.device?.name || this.device?.deviceName}<br>
+      Level: ${this.level}<br>
       Pump Status: ${this.pumpStatus === 1 ? 'ON' : 'OFF'}
     `);
   }, 1000);
 }
+
   toggleSwitch(switch_id: number, value: number) {
     this.data['do'][switch_id-1] = undefined;
     const data = {

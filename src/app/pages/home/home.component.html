@@ -41,11 +41,21 @@
       {{ device.deviceName || device.name }}
       </a>
     </li>
-    
-  
-  </ul>
+     </ul>
 </nz-card>
 
+
+    
+      <ul nz-menu nzTheme="dark" nzMode="inline">
+      <li nz-menu-item  routerLinkActive="ant-menu-item-selected" >
+        <span nz-icon nzType="user"></span>
+        <span title="Logout" (click)="logout()">LogOut</span>
+      </li>
+      </ul>
+
+    
+  
+ 
 <!---
 <nz-card nzTitle="Device List" nzBordered="true">
   <nz-table
@@ -99,7 +109,7 @@
 
        <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout" (click)="logout()">
         <span style="font-weight: bold;margin-left: 10px;"*ngFor="let device of devices">{{device.name}}</span>
-      <i nz-icon nzType="user" nzTheme="outline" style="font-size: 20px;"></i>
+      <i nz-icon nzType="user"nzTheme="outline" style="font-size: 20px;"></i>
     </span>
     </nz-header>
 
@@ -112,3 +122,4 @@
 </nz-footer>
 
 </nz-layout>
+ 

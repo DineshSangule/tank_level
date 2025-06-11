@@ -18,7 +18,8 @@ export const routes: Routes = [
         children:[
             {path: '',redirectTo: 'maindashboard', pathMatch:'full'},
             {path:'dashboard/:id',component:DashboardComponent,
-                  data: { renderMode: 'prerender' }
+                  data: { renderMode: 'no-prerender' } 
+
              },
             {path:'addtank',component:AddTankComponent},
             {path:'users',component:UsersComponent},
