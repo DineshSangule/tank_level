@@ -14,6 +14,11 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { MqttService } from '../../../services/mqtt.service';
 import { AuthService } from '../../../services/auth.service';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { FormsModule } from '@angular/forms';
+import { OrderByOnlinePipe } from '../../../pipes/order-by-online.pipe';
+import { ChangeDetectorRef } from '@angular/core';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 export interface tank {
   tankname: string;
@@ -22,18 +27,23 @@ export interface tank {
 }
 
 @Component({
+   standalone: true,
   selector: 'app-main-dashboard',
   imports: [NzProgressModule,NzAlertModule,
-    NzSwitchModule, NzTableModule,
+    NzSwitchModule, NzTableModule,NzToolTipModule,
     CommonModule,
     NzCardModule,
     NzMenuModule,
     NzLayoutModule,
     NzIconModule,
     NzBreadCrumbModule,
-    RouterModule],
+    RouterModule,
+    NzSpinModule,
+    FormsModule,
+    OrderByOnlinePipe],
   templateUrl: './main-dashboard.component.html',
-  styleUrl: './main-dashboard.component.css'
+  styleUrls: ['./main-dashboard.component.css'] // ✅ PLURAL
+
 })
 export class MainDashboardComponent implements OnInit {
   devices: any[] = [];
@@ -42,17 +52,27 @@ export class MainDashboardComponent implements OnInit {
 
   data: any = {};
 
-  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService, public Mqtt: MqttService
+  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService, public Mqtt: MqttService,  private cdr: ChangeDetectorRef
+
   ) { }
 
+    isLoaded = true;
 
 
-  ngOnInit(): void {
-    this.loadDevices(),
-      setInterval(() => {
-        this.updateDeviceData();
-      }, 1000);
-  }
+ ngOnInit(): void {
+  this.loadDevices();
+
+  this.Mqtt.message().subscribe((msg) => {
+    this.data = msg;
+    this.isLoaded = true;
+    this.cdr.detectChanges(); // <-- Force Angular to re-evaluate the sorted list
+
+  });
+
+  setInterval(() => {
+    this.updateDeviceData();
+  }, 1000);
+}
 
   loadDevices(): void {
     this.auth.getDevices().subscribe({
@@ -78,20 +98,35 @@ export class MainDashboardComponent implements OnInit {
     });
   }
 
-  updateDeviceData(): void {
-    this.devices.forEach(device => {
-      const deviceData = this.Mqtt.data[device.uuid];
-      this.data[device.id].level = deviceData.level;
-      this.data[device.id].pumpStatus = deviceData.pumpStatus;
+ updateDeviceData(): void {
+  this.devices.forEach(device => {
+    const deviceData = this.Mqtt.data[device.uuid];
+    if (!deviceData) return;
 
-      if (Array.isArray(deviceData.ai)) {
-        this.data[device.id].aiValues = deviceData.ai;
-      }
+    // Ensure device data object exists
+    if (!this.data[device.id]) {
+      this.data[device.id] = {};
+    }
+      this.cdr.detectChanges();
 
-      console.log('Level:', this.data[device.id].level, 'Pump Status:', this.data[device.id].pumpStatus);
-    
+
+    this.data[device.id].level = deviceData.level;
+    this.data[device.id].pumpStatus = deviceData.pumpStatus;
+
+    if (Array.isArray(deviceData.ai)) {
+      this.data[device.id].aiValues = deviceData.ai;
+    }
+
+    if (Array.isArray(deviceData.do)) {
+      this.data[device.id].do = deviceData.do;
+    }
+
+    console.log(`Device ID: ${device.id}`);
+    console.log('Level:', this.data[device.id].level);
+    console.log('Pump Status:', this.data[device.id].pumpStatus);
   });
-  }
+}
+
   
   isPumpOn(id:number): boolean {
     return this.data[id].pumpStatus === 1;
@@ -100,7 +135,6 @@ export class MainDashboardComponent implements OnInit {
   openDevice(id: number) {
     this.router.navigate(['/dashboard', id])
   }
-
 
 
 }

@@ -19,13 +19,32 @@ import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
-import * as L from 'leaflet';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import { fromLonLat } from 'ol/proj';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { IstTimePipe } from '../../../pipes/ist-time.pipe';
+
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import Style from 'ol/style/Style';
+import Icon from 'ol/style/Icon';
+import { saveAs } from 'file-saver'; // Warning will appear unless allowedCommonJsDependencies is set
+
 
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NzInputModule, NzToolTipModule, NzCollapseModule, FormsModule, NzDatePickerModule, NzTableModule, CommonModule,NzAlertModule, NzTabsModule, NzStatisticModule, NzTimePickerModule, CommonModule, NzCardModule, NzFormModule, NzLayoutModule, NzIconModule, NzSwitchModule],
+  imports: [NzButtonModule,NzSelectModule ,NzInputModule, NzToolTipModule, NzCollapseModule, FormsModule, NzDatePickerModule, NzTableModule, CommonModule,NzAlertModule, NzTabsModule, NzStatisticModule, NzTimePickerModule, CommonModule, NzCardModule, NzFormModule, NzLayoutModule, NzIconModule, NzSwitchModule,NzSpinModule,IstTimePipe ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -36,17 +55,21 @@ export class DashboardComponent implements OnInit,AfterViewInit {
   level: number = 0;
   pumpStatus: number = 0;
   private isBrowser: boolean;
-  private map: any;
   device_id: number = 0;
   device: any = {};
   data:any = undefined;
   lastReceivedTime: string = '';
   lastReceivedTimestamp: number = 0;
-deviceOnline: boolean = false;
+  deviceOnline: boolean = false;
+  private map!: Map;
+  timeAgo: string = '';
+  private timeInterval: any;
+  timer: number | null = null;
 
 
 
-  constructor(private route: ActivatedRoute, private router: Router, public mqtt: MqttService, private reportService: AuthService,
+
+constructor(private route: ActivatedRoute, private router: Router, public mqtt: MqttService, private reportService: AuthService,
     private message: NzMessageService,     @Inject(PLATFORM_ID) private platformId: Object
 ) {
       this.isBrowser = isPlatformBrowser(platformId);
@@ -57,6 +80,7 @@ deviceOnline: boolean = false;
         {
           this.router.navigate(["/maindashboard"]);
         }
+  
       this.device_id = param['id'];
       console.log(this.device_id,this.mqtt.devices)
       this.device = this.mqtt.devices[this.device_id];
@@ -66,13 +90,29 @@ deviceOnline: boolean = false;
         }
     })
   }
+    isAdmin = false;
+
 
   ngOnInit(): void {
+        this.isAdmin = this.reportService.isAdmin(); 
+
+     this.subscribeToMqtt();
+     this.sendGetTime();
 
     setInterval(() => {
       this.updateDeviceData();
     }, 1000);
+
+    this.timeInterval = setInterval(()=>
+    {
+      this.updateTimeAgo();
+    },60000);
   }
+  ngOnDestroy():void{
+    clearInterval(this.timeInterval);
+  }
+  mcconfig: any = null;
+
 
 updateDeviceData(): void {
   console.log('Selected Device:', this.device?.name || this.device?.deviceName);
@@ -93,10 +133,40 @@ updateDeviceData(): void {
       this.aiValues = this.data.ai;
     }
 
+     if(this.data.timer)this.timer = Number(this.data.timer);
+      
+    const tank = this.device.uuid;
+    const tconfig = this.mqtt.data[tank];
+
+    if (tank && tconfig?.config) {
+      const configData = tconfig.config;
+
+      if (configData.type === 'time' && configData.key === 'stime') {
+        this.mcconfig = configData;
+        console.log('🕒 Schedule Time Config Received:', this.mcconfig);
+
+        if (Array.isArray(configData.value)) {
+          configData.value.forEach((slot: string, index: number) => {
+            const [idStr, enableStr, startStr, endStr] = slot.split(',');
+            const from = this.convertMinutesToTime(+startStr);
+            const to = this.convertMinutesToTime(+endStr);
+            const enabled = enableStr === '1';
+            console.log(`🔹 Slot ${index + 1}: ${enabled ? '✅ Enabled' : '❌ Disabled'} | ${from} → ${to}`);
+          });
+        } else {
+          console.warn('⚠️ Invalid config.value format:', configData.value);
+        }
+      }
+    }
+     
+
+
     this.lastReceivedTimestamp = Date.now();
     this.lastReceivedTime = new Date(this.lastReceivedTimestamp).toLocaleString();
-    this.deviceOnline = true;
 
+    this.deviceOnline = this.data['do'] !== undefined;
+    this.updateTimeAgo();
+    
     console.log('Device Name:', this.device?.name || this.device?.deviceName);
     console.log('Level:', this.level, 'Pump Status:', this.pumpStatus);
     console.log('Last Received:', this.lastReceivedTime);
@@ -108,6 +178,26 @@ updateDeviceData(): void {
       console.warn('Latitude or Longitude is missing in the selected device.');
     }
   }
+}
+
+updateTimeAgo(): void{
+  if(!this.lastReceivedTimestamp)
+  {
+    this.timeAgo = '';
+    return;
+  }
+  const now = Date.now();
+
+  const diffMs = now - this.lastReceivedTimestamp;
+  const diffMin = Math.floor(diffMs/60000);
+  const diffHour = Math.floor(diffMin/60);
+  const diffDay = Math.floor(diffHour/24);
+
+  if(diffMin<1) this.timeAgo = 'few sec ago';
+  else if (diffMin < 60) this.timeAgo = `${diffMin} min ago'`;
+  else if(diffHour < 24) this.timeAgo = `${diffHour} hour${diffHour>1 ? 's' : ''}ago`;
+  else this.timeAgo = `${diffDay} day${diffDay > 1 ? 's' : ''}ago`;
+  
 }
 
 
@@ -175,31 +265,12 @@ isTankEmpty(): boolean {
   onClickReports() {
     this.router.navigate(['/reports']);
   }
-  timeSlots = [
-    {
-      enabled: false,
-      onTime: null,
-      offTime: null
-    }
-  ];
-
-  addTimeSlot() {
-    this.timeSlots.push({
-      enabled: false,
-      onTime: null,
-      offTime: null
-    });
-  }
-
-  submitTimeSlot(index: number) {
-    const slot = this.timeSlots[index];
-    console.log(`Slot ${index + 1} submitted`, slot);
-  }
+ 
 
 
   //reports
 
-  dailyDeviceId = 1;
+  dailyDeviceId = 0;
   dailyFromDate = '';
   dailyToDate = '';
   dailyReports: any[] = [];
@@ -211,37 +282,47 @@ isTankEmpty(): boolean {
 
 
 
-  fetchDailyReports(): void {
-    if (!this.dailyDeviceId || !this.dailyFromDate || !this.dailyToDate) {
-      this.message.warning('Please select all fields for daily report');
-      return;
-    }
-
-    this.reportService.getReports(this.dailyDeviceId, this.dailyFromDate, this.dailyToDate)
-      .subscribe({
-        next: (res) => {
-          console.log('Daily Report API Response:', res);
-          if (res.success) {
-            this.dailyReports = Array.isArray(res.data) ? res.data : res.data?.daily || [];
-            this.message.success('Daily reports fetched successfully');
-          } else {
-            this.message.error('No daily reports found');
-          }
-        },
-        error: (err) => {
-          console.error('Error fetching daily reports:', err);
-          this.message.error('Error fetching daily reports');
-        }
-      });
+ fetchDailyReports(): void {
+  if (!this.device_id || !this.dailyFromDate || !this.dailyToDate) {
+    this.message.warning('Please select all fields for daily report');
+    return;
   }
 
+  this.reportService.getReports(this.device_id, this.dailyFromDate, this.dailyToDate)
+    .subscribe({
+      next: (res) => {
+        console.log('Daily Report API Response:', res);
+        if (res.success) {
+          const reports = Array.isArray(res.data) ? res.data : res.data?.daily || [];
+          this.dailyReports = reports;
+
+          if (reports.length > 0 && reports[0].do) {
+            this.data['do'] = reports[0].do;
+            console.log("DO Values:", this.data['do']);
+          } else {
+            this.data['do'] = []; 
+          }
+
+          this.message.success('Daily reports fetched successfully');
+        } else {
+          this.message.error('No daily reports found');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching daily reports:', err);
+        this.message.error('Error fetching daily reports');
+      }
+    });
+}
+
+
   fetchMonthlyReports(): void {
-    if (!this.monthlyDeviceId || !this.monthlyFromDate || !this.dailyToDate) {
+    if (!this.device_id || !this.monthlyFromDate || !this.dailyToDate) {
       this.message.warning('Please select all fields for monthly report');
       return;
     }
 
-    this.reportService.getMonthReports(this.monthlyDeviceId, this.monthlyFromDate, this.dailyToDate)
+    this.reportService.getMonthReports(this.device_id, this.monthlyFromDate, this.dailyToDate)
       .subscribe({
         next: (res) => {
           console.log('Monthly Report API Response:', res);
@@ -269,9 +350,6 @@ isTankEmpty(): boolean {
     console.log(`${this.switches[index].label} is now ${newState ? 'ON' : 'OFF'}`);
   }
 
-
-
-
   turnOnClick(): void {
     alert('Do you want to turn the motor ON?');
   }
@@ -283,70 +361,289 @@ isTankEmpty(): boolean {
   ];
 
 
-  ngAfterViewInit(): void {
-    if (this.isBrowser) {
-      setTimeout(() => {
-        this.initMap();
-      }, 0);
-    }
+ngAfterViewInit(): void {
+  if (this.isBrowser) {
+    setTimeout(() => {
+      this.initMap();
+    }, 0);
   }
-
-  private async initMap(): Promise<void> {
-  const L = await import('leaflet');
-const lat = this.device?.lat || 0;
-const lng = this.device?.lng || 0;
-
-
-  this.map = L.map('map', {
-    center: [lat, lng],
-    zoom: 12,
-  });
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-  }).addTo(this.map);
-
-  const redIcon = L.icon({
-    iconUrl: 'off.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    iconSize: [70, 50],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
-  });
-
-  const marker = L.marker([lat, lng], { icon: redIcon }).addTo(this.map);
-
-  marker.bindTooltip(() => {
-    return `
-      <b>Device Info</b><br>
-       Device Name: ${this.device?.name || this.device?.deviceName}<br>
-      Level: ${this.level}<br>
-      Pump Status: ${this.pumpStatus === 1 ? 'ON' : 'OFF'}
-    `;
-  }, { direction: 'top', sticky: true });
-
-  setInterval(() => {
-    marker.setTooltipContent(`
-      <b>Device Info</b><br>
-      Device Name: ${this.device?.name || this.device?.deviceName}<br>
-      Level: ${this.level}<br>
-      Pump Status: ${this.pumpStatus === 1 ? 'ON' : 'OFF'}
-    `);
-  }, 1000);
 }
 
+private initMap(): void {
+  const lat = this.device?.lat;
+  const lng = this.device?.lng;
+
+  if (lat == null || lng == null) {
+    console.warn('Latitude or Longitude is missing in the selected device.');
+    return;
+  }
+
+  const iconFeature = new Feature({
+    geometry: new Point(fromLonLat([lng, lat])),
+    name: 'Device Location'
+  });
+
+  const iconStyle = new Style({
+    image: new Icon({
+      anchor: [0.5, 1],
+      src: 'off.png', 
+      scale: 0.25 
+    })
+  });
+
+  iconFeature.setStyle(iconStyle);
+
+  const vectorLayer = new VectorLayer({
+    source: new VectorSource({
+      features: [iconFeature]
+    })
+  });
+
+  this.map = new Map({
+    target: 'map',
+    layers: [
+      new TileLayer({
+        source: new OSM()
+      }),
+      vectorLayer
+    ],
+    view: new View({
+      center: fromLonLat([lng, lat]),
+      zoom: 17
+    })
+  });
+}
+
+
   toggleSwitch(switch_id: number, value: number) {
-    this.data['do'][switch_id-1] = undefined;
+  this.data['do'][switch_id-1] = undefined;
+  console.log("do[0]:", this.data['do'][0]);
+  console.log("do[1]:", this.data['do'][1]);
+  console.log("do[2]:", this.data['do'][2]);
     const data = {
       type: "control",
       id: 1,
       key: switch_id,
       value
     };
+
+
     this.mqtt.publish(this.device.uuid, JSON.stringify(data));
   }
+timeSlots = [
+  { enabled: true, onTime: new Date(), offTime: new Date() }
+];
 
-
+addTimeSlot(): void {
+  this.timeSlots.push({
+    enabled: true,
+    onTime: new Date(),
+    offTime: new Date(),
+  });
+}
+/* set Cammand Logic */
+calculateMinutes(date: Date): number {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  return hours * 60 + minutes;
 }
 
+submitTimeSlot(index: number): void {
+  const slot = this.timeSlots[index];
+
+  const id = index.toString().padStart(2, '0'); 
+  const enable = slot.enabled ? '1' : '0';
+  const on = this.calculateMinutes(slot.onTime);  
+  const off = this.calculateMinutes(slot.offTime); 
+
+  const payload = {
+    type: 'config',
+    id: 1,
+    key: 'stime',
+    value: `${id},${enable},${on},${off}`
+  };
+
+  console.log('Sending Slot:', payload);
+  this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
+}
+
+  timeValueMinutes: number | null = null;
+  formattedTime: string = '';
+
+convertMinutesToTime(value: number): string {
+  const hours = Math.floor(value / 60).toString().padStart(2, '0');
+  const minutes = (value % 60).toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+
+sendGetConfig(): void {
+  const cmdPayload = {
+    type: 'command',
+    id: 1,
+    cmd: 'config'
+  };
+
+  console.log('Sending get_time:', cmdPayload);
+  this.mqtt.publish(this.device.uuid, JSON.stringify(cmdPayload));
+}
+
+sendConfigRequest(): void {
+  const cmdPayload = {
+    type: 'command',
+    id: 1,
+    cmd: 'config'
+  };
+
+  const topic = `vidani/vl/${this.device.uuid}`;
+  this.mqtt.publish(topic, JSON.stringify(cmdPayload));
+}
+
+
+fetchedSlot = {
+  enabled: false,
+  onTime: '',
+  offTime: ''
+};
+
+
+
+subscribeToMqtt(): void {
+  this.mqtt.message().subscribe(({ topic, message }) => {
+    console.log('MQTT Message Received:', message); // Add this line
+
+    try {
+      const payload = JSON.parse(message);
+
+      if (payload.type === 'response' && payload.cmd === 'get_time') {
+        const valueArray = payload.value;
+
+        if (Array.isArray(valueArray) && valueArray.length > 0) {
+          const [enableStr, onStr, offStr] = valueArray[0].split(',');
+
+          this.fetchedSlot.enabled = enableStr === '1';
+          this.fetchedSlot.onTime = this.convertMinutesToTime(+onStr);
+          this.fetchedSlot.offTime = this.convertMinutesToTime(+offStr);
+
+          console.log('Fetched Slot:', this.fetchedSlot.offTime); // Confirm this prints correct values
+          console.log('Fetched Slot:', this.fetchedSlot.onTime); // Confirm this prints correct values
+
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing MQTT message:', error);
+    }
+  });
+}
+
+
+  
+
+ tankAlerts = [
+  {
+    enabled: false,
+    level: 20,
+    message: 'Tank is 20% full'
+  }
+];
+
+levels = [20, 40, 60, 80, 100];
+
+addAlert() {
+  this.tankAlerts.push({
+    enabled: true,
+    level: 20,
+    message: 'Tank is 20% full'
+  });
+}
+
+onSensorChange(index: number) {
+  const alert = this.tankAlerts[index];
+  if (alert.enabled && !alert.message?.includes('% full')) {
+    alert.message = `Tank is ${alert.level}% full`;
+  }
+}
+
+
+
+exportToExcel(): void {
+  if (!this.dailyReports || this.dailyReports.length === 0) {
+    this.message.warning('No data to export');
+    return;
+  }
+
+  // 1. Header info rows
+  const headerInfo = [
+    ['Site Name:', this.device.name || 'N/A'],
+    ['IMEI:', this.device.uuid || 'N/A'],
+    ['Area:', this.device.area || 'N/A'],
+    [], // empty row before table
+  ];
+
+  // 2. Table data rows
+  const tableHeaders = [
+    'Date & Time',
+    'Tank Level',
+    'Switch 1',
+    'Switch 2',
+    'Switch 3',
+    'Motor Status'
+  ];
+
+  const tableData = this.dailyReports.map(row => [
+    new Date(row.date).toLocaleString(),
+    row.level,
+    row.do?.[0] === 1 ? 'ON' : 'OFF',
+    row.do?.[1] === 1 ? 'ON' : 'OFF',
+    row.do?.[2] === 1 ? 'ON' : 'OFF',
+    row.pumpStatus === 1 ? 'ON' : 'OFF'
+  ]);
+
+  // 3. Combine all
+  const fullSheetData = [...headerInfo, tableHeaders, ...tableData];
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(fullSheetData);
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Daily Report': worksheet },
+    SheetNames: ['Daily Report']
+  };
+
+  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const fileData: Blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(fileData, `Daily_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+private amodeTimeoutRef: any;
+
+loadingAmode: boolean = false;
+
+
+onToggleTimer(Mode: number): void {
+  if (this.loadingAmode) return;
+
+  this.loadingAmode = true;
+
+  const payload = {
+    type: 'config',
+    id: 1,
+    key: 'timer',
+    value: String(Mode)
+  };
+
+  this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
+
+  this.amodeTimeoutRef = setTimeout(() => {
+    this.loadingAmode = false;
+    console.warn('Auto mode toggle timeout (30s)');
+  }, 10000);
+}
+sendGetTime(): void {
+    const payload = {
+      type: 'command',
+      id: 1,
+      cmd: 'get_time'
+    };
+    this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
+  }
+
+}

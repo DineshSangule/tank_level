@@ -25,6 +25,20 @@ export class AuthService {
     return token !== null ? token : '';
   }
 
+  saveRole(role: string): void {
+    localStorage.setItem('userRole', role);
+  }
+
+  getRole(): string {
+    return localStorage.getItem('userRole') || '';
+  }
+
+  isAdmin(): boolean {
+    return this.getRole() === 'admin';
+  }
+
+
+
   isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) return false;

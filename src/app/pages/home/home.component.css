@@ -38,3 +38,42 @@
       nz-footer {
         text-align: center;
       }
+
+.page-title {
+  font-weight: bold;
+  font-size: larger;
+}
+
+/* Hide title only when sidebar is collapsed on small screens */
+@media (max-width: 767px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+:root {
+  --sidebar-width: 200px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 80vw;
+  }
+}
+@media (max-width: 767px) {
+  .trigger {
+    z-index: 1001;
+    position: relative;
+  }
+
+  nz-sider {
+    z-index: 1000;
+  }
+
+  .page-title {
+    display: inline-block;
+    margin-left: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+}

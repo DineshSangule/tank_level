@@ -1,98 +1,90 @@
 <nz-layout style="min-height: 100vh;">
-  <nz-sider nzCollapsible [(nzCollapsed)]="isCollapsed" [nzTrigger]="null" [nzBreakpoint]="'lg'" [nzCollapsedWidth]="0"
->
-   <div style="display: flex; align-items: center; justify-content: center;">
-  <img src="logo.jpg" alt="Agromation Logo" style="width: 50px; height: auto; margin-right: 10px;border-radius: 80%;">
-  <h2 style="color: white; margin: 0;">Agromation</h2>
-</div>
+<nz-sider #siderRef nzCollapsible [(nzCollapsed)]="isCollapsed" [nzTrigger]="null" [nzBreakpoint]="'lg'" [nzCollapsedWidth]="0">
+
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <img src="logo.jpg" alt="Agromation Logo" style="width: 50px; height: auto; margin-right: 10px;border-radius: 80%;">
+      <h2 style="color: white; margin: 0;">Agromation</h2>
+    </div>
+
     <ul nz-menu nzTheme="dark" nzMode="inline">
       <li nz-menu-item routerLink="maindashboard" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="dashboard"></span>
         <span>Dashboard</span>
       </li>
 
-    <!---
+      <!---
       <li nz-menu-item routerLink="/addtank" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="plus"></span>
         <span>Add Tank</span>
       </li>
 
-    
-
       <li nz-menu-item routerLink="/users" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="user"></span>
         <span>users</span>
       </li>
+            <div style="font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
 
       <li nz-menu-item routerLink="/reports" routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="bar-chart"></span>
-
         <span>Reports</span>
       </li>
--->
-
+      -->
+  </ul>
 <nz-card nzTitle="Device Names" nzBordered="true" style="margin-top: 12px;">
 
   <ul class="device-list">
-    <li *ngFor="let device of devices" style="cursor: pointer;" class="device-item">
+    <li *ngFor="let device of devices" style="cursor: pointer; margin-left: -30px;">
       <span nz-icon nzType="tablet" style="margin-right: 8px;"></span>
-      <a (click)="goToDashboard()">      
+                  <div style="font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+
+      <a (click)="goToDashboard(device.id)">      
 
       {{ device.deviceName || device.name }}
       </a>
+      </div>
     </li>
      </ul>
 </nz-card>
 
 
-    
-      <ul nz-menu nzTheme="dark" nzMode="inline">
-      <li nz-menu-item  routerLinkActive="ant-menu-item-selected" >
+    <ul nz-menu nzTheme="dark" nzMode="inline">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <span nz-icon nzType="user"></span>
         <span title="Logout" (click)="logout()">LogOut</span>
       </li>
-      </ul>
-
-    
-  
- 
-<!---
-<nz-card nzTitle="Device List" nzBordered="true">
-  <nz-table
-    [nzData]="devices"
-    [nzBordered]="true"
-    [nzSize]="'middle'"
-    [nzScroll]="{ x: '1000px' }"
-    [nzShowPagination]="false"
-  >
-    <thead>
-      <tr>
-        <th>Device ID</th>
-        <th>Device Name</th>
-        <th>IMEI</th>
-        <th>Area</th>
-        <th>Flow Multiplier</th>
-        <th>Start Date</th>
-        <th>Expiry Date</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let device of devices">
-       <td>{{ device.deviceId || device.id }}</td>
-        <td>{{ device.deviceName || device.name }}</td>
-        <td>{{ device.status || 'Unknown' }}</td>
-      </tr>
-    </tbody>
-  </nz-table>
-
- 
-</nz-card>
--->
-
-
-
-
     </ul>
+
+    <!---
+    <nz-card nzTitle="Device List" nzBordered="true">
+      <nz-table
+        [nzData]="devices"
+        [nzBordered]="true"
+        [nzSize]="'middle'"
+        [nzScroll]="{ x: '1000px' }"
+        [nzShowPagination]="false"
+      >
+        <thead>
+          <tr>
+            <th>Device ID</th>
+            <th>Device Name</th>
+            <th>IMEI</th>
+            <th>Area</th>
+            <th>Flow Multiplier</th>
+            <th>Start Date</th>
+            <th>Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let device of devices">
+            <td>{{ device.deviceId || device.id }}</td>
+            <td>{{ device.deviceName || device.name }}</td>
+            <td>{{ device.status || 'Unknown' }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-card>
+    -->
+
   </nz-sider>
 
   <nz-layout>
@@ -103,23 +95,28 @@
         (click)="isCollapsed = !isCollapsed"
       >
         <i nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></i>
-
       </span>
-              <span style="font-weight: bold;font-size: larger;">Tank Level Monitoring System</span>
 
-       <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout" (click)="logout()">
-        <span style="font-weight: bold;margin-left: 10px;"*ngFor="let device of devices">{{device.name}}</span>
-      <i nz-icon nzType="user"nzTheme="outline" style="font-size: 20px;"></i>
-    </span>
+      <!-- Title only shows when not on mobile with collapsed sidebar -->
+      <span class="page-title" [ngClass]="{ 'hide-on-mobile': !isCollapsed }">
+        Tank Level Monitoring System
+      </span>
+
+      <!-- Your content layout here -->
+      <span [ngClass]="{ 'hide-on-mobile': !isCollapsed }">
+        <span style="cursor: pointer;float: right;margin-right: 20px;"  title="Logout" (click)="logout()">
+          <span style="font-weight: bold;margin-left: 10px">{{username}}</span>
+          <i nz-icon nzType="user"nzTheme="outline" style="font-size: 20px;"></i>
+        </span>
+      </span>
     </nz-header>
 
-    <nz-content style="margin: 24px 16px; padding: 24px; background: #fff; min-height: 280px;">
+    <nz-content style="margin-top: 5px; padding: 24px; background: #fff; min-height: 280px;">
       <router-outlet></router-outlet>
     </nz-content>
 
-  <nz-footer style="text-align: center; padding: 1px 0 ; line-height: 30px; font-size: 15px;;">
-  <span>Copyright © 2025 Agromation India All rights reserved.</span>
-</nz-footer>
-
+    <nz-footer style="text-align: center; padding: 1px 0 ; line-height: 30px; font-size: 15px;;">
+      <span>Copyright © 2025 Agromation India All rights reserved.</span>
+    </nz-footer>
+  </nz-layout>
 </nz-layout>
- 
