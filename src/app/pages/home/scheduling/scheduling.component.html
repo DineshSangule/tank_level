@@ -1,69 +1,111 @@
-<nz-card nzTitle="Time Scheduling" style="max-width: 800px; margin: auto;">
+  <nz-spin     [nzSpinning]="!(mqtt.data[device.uuid]?.config?.value?.length > 0)"
+>
+<div class="desktop-table" *ngIf="isDesktop && showScheduling">
+    <nz-table
+      [nzBordered]="true"
+      [nzSize]="'small'"
+      [nzShowPagination]="false"
+    >
+      <thead>
+        <tr>
+          <th style="width: 20%; text-align: center;">Relay</th>
+          <th style="width: 30%; text-align: center;">Slot 1</th>
+          <th style="width: 30%; text-align: center;">Slot 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of [0, 1, 2]">
+          <td style="text-align: center;">Relay {{ row + 1 }}</td>
 
-  <div
-    style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; text-align: center;"
-  >
-    <div style="width: 150px;"></div>
-    <div style="flex: 1;">
-      <div
-        style="background-color: green; color: white; width: 100px; height: 30px;
-               line-height: 30px; border-radius: 4px; margin: 0 auto;"
-      >
-        On Time
-      </div>
-    </div>
-    <div style="flex: 1;">
-      <div
-        style="background-color: red; color: white; width: 100px; height: 30px;
-               line-height: 30px; border-radius: 4px; margin: 0 auto;"
-      >
-        Off Time
-      </div>
-    </div>
-    <div style="width: 120px;"></div>
-  </div>
+          <ng-container *ngFor="let col of [0, 1]">
+            <ng-container *ngIf="mqtt.data[device.uuid]?.config?.value?.[row * 2 + col] as slot">
+              <td>
+                <nz-time-picker
+                  [(ngModel)]="startTimes[row * 2 + col]"
+                  [nzUse12Hours]="false"
+                  nzFormat="HH:mm"
+                  [nzMinuteStep]="1"
+                  style="width: 100%"
+                ></nz-time-picker>
+                <br />
+                <nz-time-picker
+                  [(ngModel)]="endTimes[row * 2 + col]"
+                  [nzUse12Hours]="false"
+                  nzFormat="HH:mm"
+                  [nzMinuteStep]="1"
+                  style="width: 100%; margin-top: 5px;"
+                ></nz-time-picker>
+                <br />
+                <button
+                  nz-button
+                  nzType="primary"
+                  nzSize="small"
+                  (nzOnConfirm)="sendSingleSlot(row * 2 + col)"
+                  nz-popconfirm
+                   nzPopconfirmTitle="Are you sure you want to update?"
+                  style="margin-top: 4px; width: 90%"
+                >
+                  Update
+                </button>
+              </td>
+            </ng-container>
+          </ng-container>
+        </tr>
+      </tbody>
+    </nz-table>
+ 
+</div>
+ </nz-spin>
 
-  <div
-    *ngFor="let slot of timeSlots; let i = index"
-    style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;"
-  >
-    <div style="width: 150px; display: flex; align-items: center; gap: 8px;">
-      <label>Enable:</label>
-      <nz-switch [(ngModel)]="slot.enabled"></nz-switch>
-    </div>
+<div class="mobile-cards" *ngIf="!isDesktop && showScheduling">
+    <nz-spin [nzSpinning]="loading" nzTip="Loading..." style="width: 100%;">
 
-    <div style="flex: 1; min-width: 150px;">
-      <nz-time-picker
-        [(ngModel)]="slot.onTime"
-        [nzDisabled]="!slot.enabled"
-        [nzFormat]="'HH:mm'"
-        style="width: 100%;"
-      ></nz-time-picker>
+  <ng-container *ngFor="let row of [0, 1, 2]">
+    <nz-card [nzTitle]="titleTemplate" nzSize="small" style="margin-bottom: 12px;">
+  <ng-template #titleTemplate>
+    <div class="custom-card-title">
+      Relay {{ row + 1 }}
     </div>
+  </ng-template>
+      <ng-container *ngFor="let col of [0, 1]">
+        <ng-container *ngIf="mqtt.data[device.uuid]?.config?.value?.[row * 2 + col] as slot">
+          <div style="margin-bottom: 12px;">
+            <strong>Slot {{ col + 1 }}</strong>
+            <nz-time-picker
+              [(ngModel)]="startTimes[row * 2 + col]"
+              [nzUse12Hours]="false"
+              nzFormat="HH:mm"
+              [nzMinuteStep]="1"
+              style="width: 100%; margin-top: 5px;"
+            ></nz-time-picker>
+            <nz-time-picker
+              [(ngModel)]="endTimes[row * 2 + col]"
+              [nzUse12Hours]="false"
+              nzFormat="HH:mm"
+              [nzMinuteStep]="1"
+              style="width: 100%; margin-top: 5px;"
+            ></nz-time-picker>
+            <button
+              nz-button
+              nzType="primary"
+              nzSize="small"
+               (nzOnConfirm)="sendSingleSlot(row * 2 + col)"
+              nz-popconfirm
+              nzPopconfirmTitle="Are you sure you want to update?"
+              style="margin-top: 6px; width: 100%;"
+            >
+              Update
+            </button>
+          </div>
+        </ng-container>
+      </ng-container>
+    </nz-card>
+  </ng-container>
+  </nz-spin>
+</div>
 
-    <div style="flex: 1; min-width: 150px;">
-      <nz-time-picker
-        [(ngModel)]="slot.offTime"
-        [nzDisabled]="!slot.enabled"
-        [nzFormat]="'HH:mm'"
-        style="width: 100%;"
-      ></nz-time-picker>
-    </div>
 
-    <div style="width: 120px;">
-      <button
-        nz-button
-        nzType="primary"
-        [disabled]="!slot.enabled"
-        (click)="submitTimeSlot(i)"
-        style="width: 100%;"
-      >
-        Update
-      </button>
-    </div>
-  </div>
 
-  <button nz-button nzType="dashed" (click)="addTimeSlot()" style="margin: 0 auto; display: block;">
-    + Add Time Slot
-  </button>
-</nz-card>
+
+
+    

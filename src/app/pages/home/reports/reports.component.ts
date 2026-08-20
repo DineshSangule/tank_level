@@ -56,7 +56,7 @@ fetchDailyReports(): void {
   this.reportService.getReports(this.dailyDeviceId, this.dailyFromDate, this.dailyToDate)
     .subscribe({
       next: (res) => {
-        console.log('Daily Report API Response:', res);
+     //   console.log('Daily Report API Response:', res);
         if (res.success) {
           this.dailyReports = Array.isArray(res.data) ? res.data : res.data?.daily || [];
           this.message.success('Daily reports fetched successfully');
@@ -65,7 +65,7 @@ fetchDailyReports(): void {
         }
       },
       error: (err) => {
-        console.error('Error fetching daily reports:', err);
+     //   console.error('Error fetching daily reports:', err);
         this.message.error('Error fetching daily reports');
       }
     });
@@ -80,7 +80,7 @@ fetchMonthlyReports(): void {
   this.reportService.getMonthReports(this.monthlyDeviceId, this.monthlyFromDate, this.dailyToDate)
     .subscribe({
       next: (res) => {
-        console.log('Monthly Report API Response:', res);
+     //   console.log('Monthly Report API Response:', res);
         if (res.success) {
           this.monthlyReports = Array.isArray(res.data) ? res.data : res.data?.monthly || [];
           this.message.success('Monthly reports fetched successfully');
@@ -89,7 +89,7 @@ fetchMonthlyReports(): void {
         }
       },
       error: (err) => {
-        console.error('Error fetching monthly reports:', err);
+        //console.error('Error fetching monthly reports:', err);
         this.message.error('Error fetching monthly reports');
       }
     });

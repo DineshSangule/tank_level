@@ -30,7 +30,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { IstTimePipe } from '../../../pipes/ist-time.pipe';
-
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import VectorLayer from 'ol/layer/Vector';
@@ -38,13 +37,12 @@ import VectorSource from 'ol/source/Vector';
 import Style from 'ol/style/Style';
 import Icon from 'ol/style/Icon';
 import { saveAs } from 'file-saver'; // Warning will appear unless allowedCommonJsDependencies is set
-
-
-
+import { SchedulingComponent } from '../scheduling/scheduling.component';
+import { NgxEchartsModule } from 'ngx-echarts';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NzButtonModule,NzSelectModule ,NzInputModule, NzToolTipModule, NzCollapseModule, FormsModule, NzDatePickerModule, NzTableModule, CommonModule,NzAlertModule, NzTabsModule, NzStatisticModule, NzTimePickerModule, CommonModule, NzCardModule, NzFormModule, NzLayoutModule, NzIconModule, NzSwitchModule,NzSpinModule,IstTimePipe ],
+  imports: [NgxEchartsModule,SchedulingComponent,NzButtonModule,NzSelectModule ,NzInputModule, NzToolTipModule, NzCollapseModule, FormsModule, NzDatePickerModule, NzTableModule, CommonModule,NzAlertModule, NzTabsModule, NzStatisticModule, NzTimePickerModule, CommonModule, NzCardModule, NzFormModule, NzLayoutModule, NzIconModule, NzSwitchModule,NzSpinModule,IstTimePipe ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -75,14 +73,14 @@ constructor(private route: ActivatedRoute, private router: Router, public mqtt: 
       this.isBrowser = isPlatformBrowser(platformId);
 
     this.route.params.subscribe((param) => {
-      console.log( param['id'] || this.mqtt.devices[this.device_id]);
+   //   console.log( param['id'] || this.mqtt.devices[this.device_id]);
       if (!param['id']) 
         {
           this.router.navigate(["/maindashboard"]);
         }
   
       this.device_id = param['id'];
-      console.log(this.device_id,this.mqtt.devices)
+    //  console.log(this.device_id,this.mqtt.devices)
       this.device = this.mqtt.devices[this.device_id];
       if (!this.device) 
         {
@@ -95,6 +93,7 @@ constructor(private route: ActivatedRoute, private router: Router, public mqtt: 
 
   ngOnInit(): void {
         this.isAdmin = this.reportService.isAdmin(); 
+        
 
      this.subscribeToMqtt();
      this.sendGetTime();
@@ -113,9 +112,15 @@ constructor(private route: ActivatedRoute, private router: Router, public mqtt: 
   }
   mcconfig: any = null;
 
+  convertMinutesToDate(minutes: number): Date {
+  const date = new Date();
+  date.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
+  return date;
+}
+
 
 updateDeviceData(): void {
-  console.log('Selected Device:', this.device?.name || this.device?.deviceName);
+  // console.log('Selected Device:', this.device?.name || this.device?.deviceName);
 
   if (this.device && !this.device.uuid) {
     const keys = Object.keys(this.mqtt.data);
@@ -143,7 +148,7 @@ updateDeviceData(): void {
 
       if (configData.type === 'time' && configData.key === 'stime') {
         this.mcconfig = configData;
-        console.log('🕒 Schedule Time Config Received:', this.mcconfig);
+        //console.log('🕒 Schedule Time Config Received:', this.mcconfig);
 
         if (Array.isArray(configData.value)) {
           configData.value.forEach((slot: string, index: number) => {
@@ -151,10 +156,11 @@ updateDeviceData(): void {
             const from = this.convertMinutesToTime(+startStr);
             const to = this.convertMinutesToTime(+endStr);
             const enabled = enableStr === '1';
-            console.log(`🔹 Slot ${index + 1}: ${enabled ? '✅ Enabled' : '❌ Disabled'} | ${from} → ${to}`);
+          //  console.log(`🔹 Slot ${index + 1}: ${enabled ? '✅ Enabled' : '❌ Disabled'} | ${from} → ${to}`);
+            
           });
         } else {
-          console.warn('⚠️ Invalid config.value format:', configData.value);
+         // console.warn('⚠️ Invalid config.value format:', configData.value);
         }
       }
     }
@@ -167,15 +173,11 @@ updateDeviceData(): void {
     this.deviceOnline = this.data['do'] !== undefined;
     this.updateTimeAgo();
     
-    console.log('Device Name:', this.device?.name || this.device?.deviceName);
-    console.log('Level:', this.level, 'Pump Status:', this.pumpStatus);
-    console.log('Last Received:', this.lastReceivedTime);
 
     if (this.device?.latitude && this.device?.longitude) {
-      console.log('Latitude:', this.device.latitude);
-      console.log('Longitude:', this.device.longitude);
+   
     } else {
-      console.warn('Latitude or Longitude is missing in the selected device.');
+     // console.warn('Latitude or Longitude is missing in the selected device.');
     }
   }
 }
@@ -209,37 +211,37 @@ updateTimeAgo(): void{
     return [
       {
         bottom: '20%',
-        isFault: (this.level >= 20 && this.aiValues[0] <= 0),
+        isFault: (this.level >= 20 && this.aiValues[0] <= 5),
         color: (this.level >= 20)
-          ? (this.aiValues[0] > 0 ? 'green' : 'red')
+          ? (this.aiValues[0] >= 5  ? 'green' : 'red')
           : '#ccc'
       },
       {
         bottom: '40%',
         isFault: (this.level >= 40 && this.aiValues[1] <= 0),
         color: (this.level >= 40)
-          ? (this.aiValues[1] > 0 ? 'green' : 'red')
+          ? (this.aiValues[1] >= 5 ? 'green' : 'red')
           : '#ccc'
       },
       {
         bottom: '60%',
         isFault: (this.level >= 60 && this.aiValues[2] <= 0),
         color: (this.level >= 60)
-          ? (this.aiValues[2] > 0 ? 'green' : 'red')
+          ? (this.aiValues[2] >= 5 ? 'green' : 'red')
           : '#ccc'
       },
       {
         bottom: '80%',
         isFault: (this.level >= 80 && this.aiValues[3] <= 0),
         color: (this.level >= 80)
-          ? (this.aiValues[3] > 0 ? 'green' : 'red')
+          ? (this.aiValues[3] >= 4 ? 'green' : 'red')
           : '#ccc'
       },
       {
         bottom: '97.5%',
         isFault: (this.level >= 98 && this.aiValues[4] <= 0),
         color: (this.level >= 98)
-          ? (this.aiValues[4] > 0 ? 'green' : 'red')
+          ? (this.aiValues[4] >= 4 ? 'green' : 'red')
           : '#ccc'
       }
     ];
@@ -291,14 +293,14 @@ isTankEmpty(): boolean {
   this.reportService.getReports(this.device_id, this.dailyFromDate, this.dailyToDate)
     .subscribe({
       next: (res) => {
-        console.log('Daily Report API Response:', res);
+      //  console.log('Daily Report API Response:', res);
         if (res.success) {
           const reports = Array.isArray(res.data) ? res.data : res.data?.daily || [];
           this.dailyReports = reports;
 
           if (reports.length > 0 && reports[0].do) {
             this.data['do'] = reports[0].do;
-            console.log("DO Values:", this.data['do']);
+         //   console.log("DO Values:", this.data['do']);
           } else {
             this.data['do'] = []; 
           }
@@ -309,7 +311,7 @@ isTankEmpty(): boolean {
         }
       },
       error: (err) => {
-        console.error('Error fetching daily reports:', err);
+      //  console.error('Error fetching daily reports:', err);
         this.message.error('Error fetching daily reports');
       }
     });
@@ -325,7 +327,7 @@ isTankEmpty(): boolean {
     this.reportService.getMonthReports(this.device_id, this.monthlyFromDate, this.dailyToDate)
       .subscribe({
         next: (res) => {
-          console.log('Monthly Report API Response:', res);
+        //  console.log('Monthly Report API Response:', res);
           if (res.success) {
             this.monthlyReports = Array.isArray(res.data) ? res.data : res.data?.monthly || [];
             this.message.success('Monthly reports fetched successfully');
@@ -334,7 +336,7 @@ isTankEmpty(): boolean {
           }
         },
         error: (err) => {
-          console.error('Error fetching monthly reports:', err);
+        //  console.error('Error fetching monthly reports:', err);
           this.message.error('Error fetching monthly reports');
         }
       });
@@ -374,7 +376,7 @@ private initMap(): void {
   const lng = this.device?.lng;
 
   if (lat == null || lng == null) {
-    console.warn('Latitude or Longitude is missing in the selected device.');
+  //  console.warn('Latitude or Longitude is missing in the selected device.');
     return;
   }
 
@@ -414,12 +416,65 @@ private initMap(): void {
   });
 }
 
+chartOptions = {
+  title: {
+    text: 'Tank Level vs Time',
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'line'
+    }
+  },
+  grid: {
+    left: 80,
+    right: 20,
+    top: 50,
+    bottom: 30
+  },
+  xAxis: {
+    type: 'value',
+    name: 'Tank Level',
+    axisLabel: {
+      formatter: '{value} %'
+    }
+  },
+  yAxis: {
+    type: 'category',
+    name: 'Time',
+    data: this.dailyReports.map(r => this.formatTime(r.date)),
+    axisLabel: {
+      rotate: 0
+    }
+  },
+  series: [
+    {
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      data: this.dailyReports.map(r => r.level),
+      lineStyle: {
+        color: '#1890ff'
+      },
+      itemStyle: {
+        color: '#1890ff'
+      },
+      name: 'Tank Level'
+    }
+  ]
+};
+
+formatTime(dateString: string): string {
+  const date = new Date(dateString);
+  return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
 
   toggleSwitch(switch_id: number, value: number) {
   this.data['do'][switch_id-1] = undefined;
-  console.log("do[0]:", this.data['do'][0]);
-  console.log("do[1]:", this.data['do'][1]);
-  console.log("do[2]:", this.data['do'][2]);
+
     const data = {
       type: "control",
       id: 1,
@@ -463,7 +518,7 @@ submitTimeSlot(index: number): void {
     value: `${id},${enable},${on},${off}`
   };
 
-  console.log('Sending Slot:', payload);
+//  console.log('Sending Slot:', payload);
   this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
 }
 
@@ -484,7 +539,7 @@ sendGetConfig(): void {
     cmd: 'config'
   };
 
-  console.log('Sending get_time:', cmdPayload);
+  //  console.log('Sending get_time:', cmdPayload);
   this.mqtt.publish(this.device.uuid, JSON.stringify(cmdPayload));
 }
 
@@ -510,7 +565,7 @@ fetchedSlot = {
 
 subscribeToMqtt(): void {
   this.mqtt.message().subscribe(({ topic, message }) => {
-    console.log('MQTT Message Received:', message); // Add this line
+   // console.log('MQTT Message Received:', message); // Add this line
 
     try {
       const payload = JSON.parse(message);
@@ -525,13 +580,11 @@ subscribeToMqtt(): void {
           this.fetchedSlot.onTime = this.convertMinutesToTime(+onStr);
           this.fetchedSlot.offTime = this.convertMinutesToTime(+offStr);
 
-          console.log('Fetched Slot:', this.fetchedSlot.offTime); // Confirm this prints correct values
-          console.log('Fetched Slot:', this.fetchedSlot.onTime); // Confirm this prints correct values
-
+  
         }
       }
     } catch (error) {
-      console.error('Error parsing MQTT message:', error);
+      //console.error('Error parsing MQTT message:', error);
     }
   });
 }
@@ -634,7 +687,7 @@ onToggleTimer(Mode: number): void {
 
   this.amodeTimeoutRef = setTimeout(() => {
     this.loadingAmode = false;
-    console.warn('Auto mode toggle timeout (30s)');
+   // console.warn('Auto mode toggle timeout (30s)');
   }, 10000);
 }
 sendGetTime(): void {
@@ -645,5 +698,42 @@ sendGetTime(): void {
     };
     this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
   }
+
+  sendUpdatedConfig(): void {
+  const imei = this.device?.device; // or get it from wherever appropriate
+  const config = this.mqtt.data?.[imei]?.config;
+
+  if (!imei || !config) {
+   // console.warn('Missing IMEI or config');
+    return;
+  }
+
+  const payload = {
+    type: 'config',
+    key: 'stime', // or other config key
+    value: config.value // or modified value if needed
+  };
+    this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
+
+}
+
+onGetConfig(): void {
+  const payload = {
+    type: 'command',
+    id: 1,
+    cmd: 'get_config'
+  };
+  this.mqtt.publish(this.device.uuid, JSON.stringify(payload));
+}
+
+onTabChange(index: number) {
+  if (index === 2) { 
+    this.sendGetTime();
+  }
+  if(index === 3)
+  {
+    this.sendConfigRequest();
+  }
+}
 
 }

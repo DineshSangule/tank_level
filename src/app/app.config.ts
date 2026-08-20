@@ -18,13 +18,30 @@ import {
   DashboardOutline,
   PlusOutline,
   MenuFoldOutline,
-  
+  UserOutline,
+  LockOutline,
+  EditOutline,
+  DeleteOutline,
+  BarChartOutline,
+  TabletOutline,
+  PlusCircleOutline
 } from '@ant-design/icons-angular/icons';
 
 registerLocaleData(en);
 
 
-const icons = [DashboardOutline, PlusOutline, MenuFoldOutline];
+const icons = [
+  DashboardOutline,
+  PlusOutline,
+  MenuFoldOutline,
+  UserOutline,
+  LockOutline,
+  EditOutline,
+  DeleteOutline,
+  BarChartOutline,
+  TabletOutline,
+  PlusCircleOutline
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [

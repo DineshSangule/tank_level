@@ -28,7 +28,7 @@
 
 
 
-<nz-tabset nzType="card" style="margin-top: -30px;">
+<nz-tabset nzType="card" (nzSelectedIndexChange)="onTabChange($event)" style="margin-top: -30px;">
   <nz-tab nzTitle="💧Tank Level">
     <div class="three-card-layout">
       <nz-card class="tank-cards">
@@ -192,60 +192,16 @@
      <nz-tab nzTitle="Turn On"(nzSelect)="turnOnClick()" 
  style="background-color: green;"></nz-tab>
 -->
-<nz-tab (click)="sendGetTime()" nzTitle="🕒Scheduling">
-  <nz-card nzTitle="Scheduling" style="max-width: 800px; margin: auto;">
-      {{timer}}
-    <p>Config Exists: {{ mqtt.data[device.uuid]?.config | json }}</p>
-
-    <div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; text-align: center;">
-      <div style="width: 150px;"></div>
-      <div style="flex: 1;">
-        <div style="background-color: green; color: white; width: 100px; height: 30px;
-             line-height: 30px; border-radius: 4px; margin: 0 auto;">On Time</div>
-      </div>
-      <div style="flex: 1;">
-        <div style="background-color: red; color: white; width: 100px; height: 30px;
-             line-height: 30px; border-radius: 4px; margin: 0 auto;">Off Time</div>
-      </div>
-      <div style="width: 120px;"></div>
-    </div>
-
-    <div *ngFor="let slot of timeSlots; let i = index"
-         style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
-      <div style="width: 150px; display: flex; align-items: center; gap: 8px;">
-        <label>Enable:</label>
-        <nz-switch [(ngModel)]="slot.enabled"></nz-switch>
-      </div>
-      <div style="flex: 1; min-width: 150px;">
-        <nz-time-picker [(ngModel)]="slot.onTime" [nzDisabled]="!slot.enabled" [nzFormat]="'HH:mm'"
-                        style="width: 100%;"></nz-time-picker>
-      </div>
-      <div style="flex: 1; min-width: 150px;">
-        <nz-time-picker [(ngModel)]="slot.offTime" [nzDisabled]="!slot.enabled" [nzFormat]="'HH:mm'"
-                        style="width: 100%;"></nz-time-picker>
-      </div>
-      <div style="width: 120px;">
-        <button nz-button nzType="primary" [disabled]="!slot.enabled" (click)="submitTimeSlot(i)"
-                style="width: 100%;">Update</button>
-      </div>
-    </div>
-
-    <button nz-button nzType="dashed" (click)="addTimeSlot()" style="margin: 0 auto; display: block;">
-      + Add Time Slot
-    </button>
-
-    <button nz-button nzType="default" (click)="sendGetTime()" style="margin: 20px auto; display: block;">
-      Get Time
-    </button>
-  </nz-card>
+<nz-tab nzTitle="🕒Scheduling">
+  <app-scheduling (schedulingClicked)="sendGetTime()"></app-scheduling>
 </nz-tab>
 
 
- <nz-tab nzTitle="📝 Reports">
+
+ <nz-tab nzTitle="📊 Reports">
   <nz-card nzTitle="Daily Report" class="filter-card">
     <form nz-form>
       <div class="filter-row" nz-row nzGutter="16" style="align-items: center;">
-   
         <div nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6">
           <nz-form-item>
             <nz-form-label [nzSpan]="24" nzFor="dailyFromDate">From Date</nz-form-label>
@@ -283,14 +239,13 @@
             nz-button
             nzType="primary"
             (click)="fetchDailyReports()"
-            class="fetch-btn"
             style="width: 100%; background-color: #1890ff;"
           >
             Get Data
           </button>
         </div>
         <div nz-col nzXs="24" nzSm="12">
-          <button nz-button nzType="default" class="fetch-btn" style="width: 100%" (click)="exportToExcel()">
+          <button nz-button nzType="default" (click)="exportToExcel()" style="width: 100%;">
             Export Data
           </button>
         </div>
@@ -299,13 +254,16 @@
   </nz-card>
 
   <div *ngIf="dailyReports.length > 0" class="reports-card">
-    <div class="table-responsive-wrapper">
- <div style="text-align: center; padding: 12px; background: #f5f5f5; border-radius: 8px; font-family: 'Segoe UI', sans-serif;">
-  <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">Site Name: {{ device.name }}</div>
-  <div style="font-weight: 500; font-size: 14px; margin-bottom: 4px;">IMEI: {{ device.uuid }}</div>
-  <div style="font-weight: 500; font-size: 14px;">Area: {{ device.area }}</div>
-</div>
+    <!-- Device Info -->
+    <div style="text-align: center; padding: 12px; background: #f5f5f5; border-radius: 8px;">
+      <div style="font-weight: 600; font-size: 16px;">Site Name: {{ device.name }}</div>
+      <div style="font-weight: 500; font-size: 14px;">IMEI: {{ device.uuid }}</div>
+      <div style="font-weight: 500; font-size: 14px;">Area: {{ device.area }}</div>
+    </div>
 
+    
+    <!-- Table -->
+    <div class="table-responsive-wrapper">
       <nz-table
         [nzData]="dailyReports"
         [nzFrontPagination]="false"
@@ -317,7 +275,7 @@
           <tr>
             <th>Time & Date</th>
             <th>Tank Level</th>
-              <th>Motor Status</th>
+            <th>Motor Status</th>
             <th>Switch 1</th>
             <th>Switch 2</th>
             <th>Switch 3</th>
@@ -326,10 +284,10 @@
         <tbody>
           <tr *ngFor="let row of dailyReports">
             <td>{{ row.date | istTime }}</td>
-            <td>{{ row.level  }}</td>
-            <td>{{ row.pump_status == 1 ? 'ON' : 'OFF'}}</td>
+            <td>{{ row.level }}</td>
+            <td>{{ row.pump_status == 1 ? 'ON' : 'OFF' }}</td>
             <td>{{ row.relay1 == 1 ? 'ON' : 'OFF' }}</td>
-            <td>{{ row.relay2 == 1 ? 'ON' : 'OFF'}}</td>
+            <td>{{ row.relay2 == 1 ? 'ON' : 'OFF' }}</td>
             <td>{{ row.relay3 == 1 ? 'ON' : 'OFF' }}</td>
           </tr>
         </tbody>
@@ -481,7 +439,7 @@
 
   </nz-collapse-panel>
 </nz-collapse>
-<nz-collapse style="margin-top: 10px;">
+<nz-collapse style="margin-top: 10px;" >
   <nz-collapse-panel [nzHeader]="'Device Config'">
    <tr>
             <td><strong>Timer</strong></td>
@@ -505,5 +463,6 @@
     </nz-collapse>
 </div>
 </nz-tab>
+
 </nz-tabset>
 

@@ -80,7 +80,7 @@ handleClickOutside(event: MouseEvent): void {
   loadDevices(): void {
     this.auth.getDevices().subscribe({
       next: (res: any) => {
-        console.log('API response:', res);
+       // console.log('API response:', res);
         if (res.success && Array.isArray(res.data)) {
           this.devices = res.data;
           this.Mqtt.connect(res.data);
@@ -89,7 +89,7 @@ handleClickOutside(event: MouseEvent): void {
         }
       },
       error: (err) => {
-        console.error('Error fetching devices:', err);
+       // console.error('Error fetching devices:', err);
         this.message.error('Failed to load devices.');
       }
     });

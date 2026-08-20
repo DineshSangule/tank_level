@@ -36,7 +36,10 @@ con.connect(err => {
 });
 
 
-var mqtt_client = mqtt.connect("mqtt://mqtt.agromationindia.com:20011");
+var mqtt_client = mqtt.connect("mqtt://mqtt.agromationindia.com:20011",{
+  username: "vidani",
+  password: "V1d4n1@2023"
+});
 
 mqtt_client.on("connect", () => {
   console.log("Connected to MQTT broker");
@@ -56,29 +59,10 @@ mqtt_client.on("message", (topic, message) => {
 function saveData(topic, message) {
   const imei = topic.split("/")[2];
   const data = JSON.parse(message);
-  const ai = data['devices'][0]['ai'];
-  let level = 0;
-  if (ai[4])
-    level = 100;
-  else if (ai[3])
-    level = 80;
-  else if (ai[2])
-    level = 60;
-  else if (ai[1])
-    level = 40;
-  else if (ai[0])
-    level = 20;
-  else
-    level = 0;
-  const pumpStatus = ai[5] ? 1 : 0;
-  const date = new Date();
-  const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ');
-  const formatedData = {
-    level,
-    pumpStatus,
-    formattedDate
-  }
-  redis_client.set("vl:" + imei, JSON.stringify(formatedData), "EX", 300, (err, reply) => {
+
+  redis_client.set("a", "10", "EX", 900);
+
+  redis_client.set("vi:" + imei.toString(), JSON.stringify(data), "EX", 900, (err, reply) => {
     if (err) console.log(err);
     else console.log(reply);
   });
@@ -86,10 +70,10 @@ function saveData(topic, message) {
 
 cron.schedule("*/15 * * * *", () => {
   const query = "SELECT * FROM `device`";
-  con.query(query, (err, result, fields) => {
+  con.query(query, (err, devices, fields) => {
     if (!err) {
-      result.forEach(element => {
-        const imei = element.uuid; 
+      devices.forEach(device => {
+        const imei = device.uuid; 
         redis_client.get("vl:" + imei).then(data1 => {
           console.log(data1);
           if (!data1) return;
@@ -97,7 +81,7 @@ cron.schedule("*/15 * * * *", () => {
           const level = formatedData.level;
           const pumpStatus = formatedData.pumpStatus;
           const date = formatedData.formattedDate;
-          const query = "INSERT INTO `logs` (`device_id`, `level`, `run_time`, `date`) VALUES ('" + element.id + "', '" + level + "', '" + pumpStatus + "', '" + date + "')";
+          const query = "INSERT INTO `logs` (`device_id`, `level`, `run_time`, `date`) VALUES ('" + device.id + "', '" + level + "', '" + pumpStatus + "', '" + date + "')";
           con.query(query, (err, result, fields) => {
             if (err) console.log(err);
             else console.log(result);

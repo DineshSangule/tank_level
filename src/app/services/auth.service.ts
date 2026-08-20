@@ -6,10 +6,13 @@ import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://tank.agromationindia.com/api';
+  public apiUrl =
+    typeof document !== 'undefined' && (document.location.hostname === 'localhost' || document.location.hostname === '127.0.0.1')
+      ? 'http://tank.agromationindia.com/api'
+      : `${typeof document !== 'undefined' ? document.location.protocol : 'http:'}//${typeof document !== 'undefined' ? document.location.hostname : 'tank.agromationindia.com'}/api`;
 
-  constructor(private http: HttpClient) {}
-    loading: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  constructor(private http: HttpClient) { }
+  loading: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
 
   login(credentials: { username: string; password: string }): Observable<any> {
@@ -20,9 +23,17 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-   getToken(): string {
+  getToken(): string {
     const token = localStorage.getItem('token');
     return token !== null ? token : '';
+  }
+
+  isTokenValid(): boolean {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 > Date.now();
   }
 
   saveRole(role: string): void {
@@ -54,17 +65,17 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
   }
-    setLoading(loading: boolean) {
+  setLoading(loading: boolean) {
     this.loading.next(loading);
   }
 
-getDevices() {
-  return this.http.get<any>(`${this.apiUrl}/getDevices`, {
-    headers: { Authorization: (typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : '') }
-  });
-}
+  getDevices() {
+    return this.http.get<any>(`${this.apiUrl}/getDevices`, {
+      headers: { Authorization: (typeof localStorage !== 'undefined' ? localStorage.getItem('token') || '' : '') }
+    });
+  }
 
-getReports(id: number, from: string, to: string): Observable<any> {
+  getReports(id: number, from: string, to: string): Observable<any> {
     const headers = new HttpHeaders({
       Authorization: this.getToken(),
       'Content-Type': 'application/json'

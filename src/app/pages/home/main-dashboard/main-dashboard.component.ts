@@ -27,10 +27,10 @@ export interface tank {
 }
 
 @Component({
-   standalone: true,
+  standalone: true,
   selector: 'app-main-dashboard',
-  imports: [NzProgressModule,NzAlertModule,
-    NzSwitchModule, NzTableModule,NzToolTipModule,
+  imports: [NzProgressModule, NzAlertModule,
+    NzSwitchModule, NzTableModule, NzToolTipModule,
     CommonModule,
     NzCardModule,
     NzMenuModule,
@@ -42,7 +42,7 @@ export interface tank {
     FormsModule,
     OrderByOnlinePipe],
   templateUrl: './main-dashboard.component.html',
-  styleUrls: ['./main-dashboard.component.css'] // ✅ PLURAL
+  styleUrls: ['./main-dashboard.component.css']
 
 })
 export class MainDashboardComponent implements OnInit {
@@ -52,39 +52,45 @@ export class MainDashboardComponent implements OnInit {
 
   data: any = {};
 
-  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService, public Mqtt: MqttService,  private cdr: ChangeDetectorRef
+  constructor(private eRef: ElementRef, private auth: AuthService, private router: Router, private message: NzMessageService, public Mqtt: MqttService, private cdr: ChangeDetectorRef
 
   ) { }
 
-    isLoaded = true;
+  isLoaded = true;
 
 
- ngOnInit(): void {
-  this.loadDevices();
+  ngOnInit(): void {
+    this.loadDevices();
 
-  this.Mqtt.message().subscribe((msg) => {
-    this.data = msg;
-    this.isLoaded = true;
-    this.cdr.detectChanges(); // <-- Force Angular to re-evaluate the sorted list
+    if (!this.auth.isTokenValid()) {
+      this.router.navigateByUrl('/login', { replaceUrl: true });
+      return;
+    }
+    this.Mqtt.message().subscribe((msg) => {
+      this.data = msg;
+      this.isLoaded = true;
+      this.cdr.detectChanges();
 
-  });
+    });
 
-  setInterval(() => {
-    this.updateDeviceData();
-  }, 1000);
-}
+    setTimeout(() => this.sendGetData(), 2000);
+
+    setInterval(() => {
+      this.updateDeviceData();
+    }, 1000);
+  }
 
   loadDevices(): void {
     this.auth.getDevices().subscribe({
       next: (res: any) => {
-        console.log('API response:', res);
+        // console.log('API response:', res);
         if (res.success && Array.isArray(res.data)) {
           this.devices = res.data;
-          res.data.forEach((device:any) => {
-              this.data[device.id] = {
-                level:null,
-                pumpStatus:null
-              }
+          res.data.forEach((device: any) => {
+            this.data[device.id] = {
+              level: null,
+              pumpStatus: null
+            }
           });
           this.Mqtt.connect(res.data);
         } else {
@@ -92,43 +98,54 @@ export class MainDashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error fetching devices:', err);
+        //   console.error('Error fetching devices:', err);
         this.message.error('Failed to load devices.');
       }
     });
   }
 
- updateDeviceData(): void {
-  this.devices.forEach(device => {
-    const deviceData = this.Mqtt.data[device.uuid];
-    if (!deviceData) return;
+  updateDeviceData(): void {
+    this.devices.forEach(device => {
+      const deviceData = this.Mqtt.data[device.uuid];
+      if (!deviceData) return;
 
-    // Ensure device data object exists
-    if (!this.data[device.id]) {
-      this.data[device.id] = {};
-    }
+      // Ensure device data object exists
+      if (!this.data[device.id]) {
+        this.data[device.id] = {};
+      }
       this.cdr.detectChanges();
 
 
-    this.data[device.id].level = deviceData.level;
-    this.data[device.id].pumpStatus = deviceData.pumpStatus;
+      this.data[device.id].level = deviceData.level;
+      this.data[device.id].pumpStatus = deviceData.pumpStatus;
 
-    if (Array.isArray(deviceData.ai)) {
-      this.data[device.id].aiValues = deviceData.ai;
-    }
+      if (Array.isArray(deviceData.ai)) {
+        this.data[device.id].aiValues = deviceData.ai;
+      }
 
-    if (Array.isArray(deviceData.do)) {
-      this.data[device.id].do = deviceData.do;
-    }
+      if (Array.isArray(deviceData.do)) {
+        this.data[device.id].do = deviceData.do;
+      }
 
-    console.log(`Device ID: ${device.id}`);
-    console.log('Level:', this.data[device.id].level);
-    console.log('Pump Status:', this.data[device.id].pumpStatus);
-  });
-}
+      // console.log(`Device ID: ${device.id}`);
+      // console.log('Level:', this.data[device.id].level);
+      // console.log('Pump Status:', this.data[device.id].pumpStatus);
+    });
+  }
 
-  
-  isPumpOn(id:number): boolean {
+  sendGetData(): void {
+    if (!this.devices || this.devices.length === 0) return;
+
+    const payload = { type: 'command', id: 1, cmd: 'get_data' };
+    this.devices.forEach(device => {
+      if (device?.uuid) {
+        this.Mqtt.publish(device.uuid, JSON.stringify(payload));
+      }
+    });
+  }
+
+
+  isPumpOn(id: number): boolean {
     return this.data[id].pumpStatus === 1;
   }
 
